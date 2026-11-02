@@ -1,0 +1,80 @@
+@baseUrl = http://localhost:5000
+@adminToken = REPLACE_WITH_ACCESS_TOKEN
+@staffToken = REPLACE_WITH_ACCESS_TOKEN
+@customerToken = REPLACE_WITH_ACCESS_TOKEN
+@categoryId = 6ad8c10cfb00000f6543fd46
+
+### 1. Khách hàng xem danh mục - mong đợi 200
+GET {{baseUrl}}/api/categories
+
+### 2. ADMIN xem tất cả danh mục - mong đợi 200
+GET {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{adminToken}}
+
+### 3. STAFF xem tất cả danh mục - mong đợi 200
+GET {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{staffToken}}
+
+### 4. CUSTOMER truy cập quản trị - mong đợi 403
+GET {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{customerToken}}
+
+### 5. Không đăng nhập truy cập quản trị - mong đợi 401
+GET {{baseUrl}}/api/admin/categories
+
+### 6. Cập nhật danh mục - mong đợi 200
+PATCH {{baseUrl}}/api/admin/categories/{{categoryId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Laptop Gaming Cao Cap",
+  "description": "Danh muc laptop gaming cao cap"
+}
+
+### 7. Không cho sửa isActive - mong đợi 400
+PATCH {{baseUrl}}/api/admin/categories/{{categoryId}}
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "isActive": false
+}
+
+### 8. ID không tồn tại - mong đợi 404
+PATCH {{baseUrl}}/api/admin/categories/507f1f77bcf86cd799439011
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Category"
+}
+
+### 9. Ẩn danh mục - mong đợi 200
+DELETE {{baseUrl}}/api/admin/categories/{{categoryId}}
+Authorization: Bearer {{adminToken}}
+
+### 10. Kiểm tra danh mục công khai sau khi ẩn (không xuất hiện) - mong đợi 200
+GET {{baseUrl}}/api/categories
+
+### 11. Kiểm tra danh mục quản trị sau khi ẩn (vẫn tồn tại với isActive=false) - mong đợi 200
+GET {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{adminToken}}
+
+### 12. Khôi phục danh mục - mong đợi 200
+PATCH {{baseUrl}}/api/admin/categories/{{categoryId}}/restore
+Authorization: Bearer {{adminToken}}
+
+### 13. Kiểm tra danh mục công khai sau khôi phục (xuất hiện trở lại) - mong đợi 200
+GET {{baseUrl}}/api/categories
+
+### 14. CUSTOMER không được ẩn danh mục - mong đợi 403
+DELETE {{baseUrl}}/api/admin/categories/{{categoryId}}
+Authorization: Bearer {{customerToken}}
+
+### 14. CUSTOMER không được ẩn danh mục - mong đợi 403
+DELETE {{baseUrl}}/api/admin/categories/{{categoryId}}
+
+Authorization: Bearer {{customerToken}}
+###
+GET {{baseUrl}}/api/products

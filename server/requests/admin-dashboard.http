@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:5000/api
+@adminToken = THAY_TOKEN_ADMIN
+@staffToken = THAY_TOKEN_STAFF
+@customerToken = THAY_TOKEN_CUSTOMER
+
+### 1. Tổng quan bảng điều khiển (Overview) - mong đợi 200
+GET {{baseUrl}}/admin/dashboard/overview
+Authorization: Bearer {{adminToken}}
+
+### 2. Thống kê doanh thu theo ngày - mong đợi 200
+GET {{baseUrl}}/admin/dashboard/revenue?from=2026-11-01&to=2026-11-30&period=day
+Authorization: Bearer {{adminToken}}
+
+### 3. Thống kê doanh thu theo tháng - mong đợi 200
+GET {{baseUrl}}/admin/dashboard/revenue?from=2026-01-01&to=2026-12-31&period=month
+Authorization: Bearer {{adminToken}}
+
+### 4. Thống kê đơn hàng theo 6 trạng thái - mong đợi 200
+GET {{baseUrl}}/admin/dashboard/orders
+Authorization: Bearer {{adminToken}}
+
+### 5. Top sản phẩm bán chạy nhất - mong đợi 200
+GET {{baseUrl}}/admin/dashboard/top-products?limit=10
+Authorization: Bearer {{adminToken}}
+
+### 6. Cảnh báo sản phẩm sắp hết hàng (stock <= 5) - mong đợi 200
+GET {{baseUrl}}/admin/dashboard/low-stock?threshold=5&limit=20
+Authorization: Bearer {{adminToken}}
+
+### --- KIỂM THỬ BẢO MẬT ---
+
+### 7. Không gửi token - mong đợi 401
+GET {{baseUrl}}/admin/dashboard/overview
+
+### 8. Token CUSTOMER - mong đợi 403
+GET {{baseUrl}}/admin/dashboard/overview
+Authorization: Bearer {{customerToken}}
+
+### 9. Token STAFF - mong đợi 403 (chỉ ADMIN được xem Dashboard)
+GET {{baseUrl}}/admin/dashboard/overview
+Authorization: Bearer {{staffToken}}
+
+### --- KIỂM THỬ THAM SỐ SAI ---
+
+### 10. Limit không phải số nguyên - mong đợi 400
+GET {{baseUrl}}/admin/dashboard/top-products?limit=abc
+Authorization: Bearer {{adminToken}}
+
+### 11. Limit vượt giới hạn 100 - mong đợi 400
+GET {{baseUrl}}/admin/dashboard/top-products?limit=101
+Authorization: Bearer {{adminToken}}
+
+### 12. Ngày không hợp lệ (tháng 2 không có ngày 30) - mong đợi 400
+GET {{baseUrl}}/admin/dashboard/revenue?from=2026-02-30
+Authorization: Bearer {{adminToken}}
+
+### 13. Chu kỳ không hợp lệ - mong đợi 400
+GET {{baseUrl}}/admin/dashboard/revenue?period=year
+Authorization: Bearer {{adminToken}}
+
+### 14. Ngưỡng tồn kho âm - mong đợi 400
+GET {{baseUrl}}/admin/dashboard/low-stock?threshold=-1
+Authorization: Bearer {{adminToken}}
+

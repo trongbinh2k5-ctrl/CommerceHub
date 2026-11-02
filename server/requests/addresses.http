@@ -1,0 +1,79 @@
+@baseUrl = http://localhost:5000
+@customerToken = REPLACE_WITH_ACCESS_TOKEN
+@adminToken = REPLACE_WITH_ACCESS_TOKEN
+@addressId = THAY_ID_DIA_CHI
+
+### 1. Thêm địa chỉ đầu tiên (mong đợi 201, isDefault = true)
+POST {{baseUrl}}/api/addresses
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van A",
+  "phone": "0912345678",
+  "province": "Ha Noi",
+  "ward": "Thach That",
+  "detail": "So 10, thon A",
+  "label": "Nha rieng"
+}
+
+### 2. Thêm địa chỉ thứ hai (mong đợi 201, isDefault = false)
+POST {{baseUrl}}/api/addresses
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van A (VP)",
+  "phone": "0987654321",
+  "province": "Ha Noi",
+  "ward": "Cau Giay",
+  "detail": "Toa nha Keangnam",
+  "label": "Van phong"
+}
+
+### 3. Xem danh sách địa chỉ (mong đợi 200)
+GET {{baseUrl}}/api/addresses
+Authorization: Bearer {{customerToken}}
+
+### 4. Sửa tên người nhận (mong đợi 200)
+PATCH {{baseUrl}}/api/addresses/{{addressId}}
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyen Van A Update"
+}
+
+### 5. Chuyển địa chỉ làm mặc định (mong đợi 200)
+PATCH {{baseUrl}}/api/addresses/{{addressId}}/default
+Authorization: Bearer {{customerToken}}
+
+### 6. Xóa địa chỉ (nếu là mặc định, hệ thống tự chọn địa chỉ khác làm mặc định) - mong đợi 200
+DELETE {{baseUrl}}/api/addresses/{{addressId}}
+Authorization: Bearer {{customerToken}}
+
+### 7. Gửi ID địa chỉ không hợp lệ (mong đợi 400)
+PATCH {{baseUrl}}/api/addresses/abc-invalid-id
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Test"
+}
+
+### 8. Sửa địa chỉ không tồn tại hoặc của người khác (mong đợi 404)
+PATCH {{baseUrl}}/api/addresses/507f1f77bcf86cd799439011
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "fullName": "Hacker"
+}
+
+### 9. Không gửi JWT (mong đợi 401)
+GET {{baseUrl}}/api/addresses
+
+### 10. Dùng tài khoản ADMIN truy cập (mong đợi 403)
+GET {{baseUrl}}/api/addresses
+Authorization: Bearer {{adminToken}}
+

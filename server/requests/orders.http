@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:5000
+@customerToken = REPLACE_WITH_ACCESS_TOKEN
+@adminToken = REPLACE_WITH_ACCESS_TOKEN
+@validAddressId = 6addeed76abffbfdc6fdec97
+@orderId = THAY_ORDER_ID
+
+### 1. Đặt hàng thành công từ giỏ hàng (mong đợi 201)
+POST {{baseUrl}}/api/orders
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "addressId": "{{validAddressId}}"
+}
+
+### 2. Xem danh sách đơn hàng của tôi (mong đợi 200)
+GET {{baseUrl}}/api/orders
+Authorization: Bearer {{customerToken}}
+
+### 3. Xem chi tiết đơn hàng (mong đợi 200)
+GET {{baseUrl}}/api/orders/{{orderId}}
+Authorization: Bearer {{customerToken}}
+
+### 4. Hủy đơn hàng và hoàn tồn kho (mong đợi 200, lần 2 là 409)
+PATCH {{baseUrl}}/api/orders/{{orderId}}/cancel
+Authorization: Bearer {{customerToken}}
+
+### 5. ADMIN/STAFF xem tất cả đơn hàng (mong đợi 200)
+GET {{baseUrl}}/api/admin/orders
+Authorization: Bearer {{adminToken}}
+
+### 6. ADMIN/STAFF chuyển trạng thái đơn (CONFIRMED -> SHIPPING -> DELIVERED)
+PATCH {{baseUrl}}/api/admin/orders/{{orderId}}/status
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED"
+}
+

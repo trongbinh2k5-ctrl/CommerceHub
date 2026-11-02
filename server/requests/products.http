@@ -1,0 +1,249 @@
+### Lấy danh sách sản phẩm
+GET http://localhost:5000/api/products
+
+### Thêm sản phẩm
+POST http://localhost:5000/api/products
+Content-Type: application/json
+
+{
+  "name": "Intel Core i5-14600K",
+  "sku": "CPU-INTEL-I5-14600K",
+  "price": 7500000,
+  "description": "CPU Intel Core i5"
+}
+### Cập nhật giá sản phẩm
+PATCH http://localhost:5000/api/products/6aca309bc3d315433be354a9
+Content-Type: application/json
+
+{
+  "price": 7200000
+}
+### Xóa mềm sản phẩm
+DELETE http://localhost:5000/api/products/6aca309bc3d315433be354a9
+### Khôi phục sản phẩm đã xóa mềm
+PATCH http://localhost:5000/api/products/6aca309bc3d315433be354a9/restore
+### Xem chi tiết sản phẩm
+GET http://localhost:5000/api/products/6aca309bc3d315433be354a9
+### Lấy tất cả sản phẩm
+GET http://localhost:5000/api/products
+
+### Tìm sản phẩm Intel
+GET http://localhost:5000/api/products?search=intel
+
+### Tìm sản phẩm không tồn tại
+GET http://localhost:5000/api/products?search=khongcotensanphamnay
+### Trang đầu tiên
+GET http://localhost:5000/api/products?page=1&limit=2
+
+### Trang thứ hai
+GET http://localhost:5000/api/products?page=2&limit=2
+
+### Tìm kiếm kết hợp phân trang
+GET http://localhost:5000/api/products?search=intel&page=1&limit=5
+
+### Kiểm tra tham số không hợp lệ
+GET http://localhost:5000/api/products?page=0&limit=10
+### Đăng ký tài khoản
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Trinh Trong Binh",
+  "email": "binh@example.com",
+  "password": "Binh@123456"
+}
+### Đăng nhập thành công
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "binh@example.com",
+  "password": "Binh@123456"
+}
+### Kiểm tra API khi không có Token
+GET http://localhost:5000/api/auth/me
+### Không có Access Token
+GET http://localhost:5000/api/auth/me
+### Có Access Token
+GET http://localhost:5000/api/auth/me
+Authorization: Bearer 
+### Có Access Token
+GET http://localhost:5000/api/auth/me
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+### Kiểm tra API chỉ dành cho ADMIN
+GET http://localhost:5000/api/auth/admin-only
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+###
+POST http://localhost:5000/api/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Laptop Test",
+  "sku": "LAP-TEST-001",
+  "price": 15000000,
+  "description": "San pham kiem tra phan quyen"
+}
+###
+
+GET http://localhost:5000/api/admin/products?isActive=false&page=1&limit=5
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+
+### 1. Tạo danh mục bằng ADMIN - mong đợi 201
+POST http://localhost:5000/api/admin/categories
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Laptop Gaming",
+  "slug": "laptop-gaming",
+  "description": "Các dòng laptop chơi game"
+}
+
+### 2. Không đăng nhập - mong đợi 401
+POST http://localhost:5000/api/admin/categories
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "slug": "laptop"
+}
+
+### 3. CUSTOMER không có quyền - mong đợi 403
+POST {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "slug": "laptop"
+}
+
+### 4. STAFF tạo danh mục - mong đợi 201
+POST {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "name": "Ban phim",
+  "slug": "ban-phim"
+}
+
+### 5. Tạo trùng slug - mong đợi 409
+POST {{baseUrl}}/api/admin/categories
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Laptop Gaming 2",
+  "slug": "laptop-gaming"
+}
+
+### 6. Tên danh mục rỗng - mong đợi 400
+POST http://localhost:5000/api/admin/categories
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "",
+  "slug": "danh-muc-test"
+}
+
+### 7. Tạo sản phẩm với categoryId hợp lệ, danh mục hoạt động - mong đợi 201
+POST http://localhost:5000/api/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Laptop Asus TUF Gaming",
+  "sku": "LAP-ASUS-TUF-001",
+  "price": 22000000,
+  "description": "Laptop gaming ben bi",
+  "categoryId": "6ad8c10cfb00000f6543fd46"
+}
+
+### 8. Tạo sản phẩm với categoryId sai định dạng - mong đợi 400
+POST http://localhost:5000/api/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Laptop Test Sai Dinh Dang",
+  "sku": "LAP-TEST-ERR-001",
+  "price": 15000000,
+  "categoryId": "sai-dinh-dang-123"
+}
+
+### 9. Tạo sản phẩm với mã danh mục không tồn tại - mong đợi 404
+POST http://localhost:5000/api/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Laptop Test Khong Ton Tai",
+  "sku": "LAP-TEST-NOTFOUND-001",
+  "price": 18000000,
+  "categoryId": "507f1f77bcf86cd799439011"
+}
+
+### 10. Tạo sản phẩm thuộc danh mục đã ẩn - mong đợi 404
+POST http://localhost:5000/api/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Laptop Test Danh Muc An",
+  "sku": "LAP-TEST-HIDDEN-001",
+  "price": 20000000,
+  "categoryId": "6ada02162c9843504c1eb5bb"
+}
+
+### 11. Tạo sản phẩm không có categoryId - mong đợi 201
+POST http://localhost:5000/api/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Chuot Khong Day Logitech",
+  "sku": "MOUSE-LOGI-M331",
+  "price": 350000,
+  "description": "Chuot silent khong on"
+}
+
+### 12. Lọc sản phẩm theo danh mục - mong đợi 200
+GET http://localhost:5000/api/products?categoryId=6ad8c10cfb00000f6543fd46
+
+### 13. Lọc danh mục kết hợp phân trang - mong đợi 200
+GET http://localhost:5000/api/products?categoryId=6ad8c10cfb00000f6543fd46&page=1&limit=5
+
+### 14. Lọc danh mục kết hợp giá - mong đợi 200
+GET http://localhost:5000/api/products?categoryId=6ad8c10cfb00000f6543fd46&minPrice=1000000&maxPrice=40000000
+
+### 15. Mã danh mục sai định dạng - mong đợi 400
+GET http://localhost:5000/api/products?categoryId=abc
+
+### 16. Không truyền danh mục - mong đợi 200
+GET http://localhost:5000/api/products
+
+### 17. Lọc theo danh mục đã ẩn (công khai không xem được) - mong đợi 200, data rỗng
+GET http://localhost:5000/api/products?categoryId=6ada02162c9843504c1eb5bb
+
+### 18. Danh sách quản trị (admin thấy tất cả kể cả thuộc danh mục ẩn) - mong đợi 200
+GET http://localhost:5000/api/admin/products
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN
+
+### 19. Chi tiết SP thuộc danh mục hoạt động - mong đợi 200
+GET http://localhost:5000/api/products/6ada02311f1f5bbee7423650
+
+### 20. Chi tiết SP thuộc danh mục đã ẩn - mong đợi 404
+GET http://localhost:5000/api/products/6adb597f1b9141879b56682c
+
+### 21. Chi tiết SP đã bị ẩn riêng - mong đợi 404
+GET http://localhost:5000/api/products/6adb5b50f230b1cef374d2ad
+
+### 22. Chi tiết SP không tồn tại - mong đợi 404
+GET http://localhost:5000/api/products/507f1f77bcf86cd799439011
+
+### 23. Khôi phục danh mục đã ẩn để SP hiển thị lại - mong đợi 200
+PATCH http://localhost:5000/api/admin/categories/6ada02162c9843504c1eb5bb/restore
+Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN

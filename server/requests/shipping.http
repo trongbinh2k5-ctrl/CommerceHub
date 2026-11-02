@@ -1,0 +1,120 @@
+@baseUrl = http://localhost:5000/api
+@customerToken = THAY_TOKEN_CUSTOMER
+@staffToken = THAY_TOKEN_STAFF
+@orderId = THAY_ORDER_ID_CONFIRMED
+@shipmentId = THAY_SHIPMENT_ID
+
+### 1. Khách hàng tạo vận đơn qua tuyến quản trị - mong đợi 403
+POST {{baseUrl}}/admin/shipping
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "orderId": "{{orderId}}",
+  "carrier": "GHTK",
+  "trackingCode": "GHTK12345678",
+  "carrierFee": 30000
+}
+
+### 2. Yêu cầu chưa đăng nhập - mong đợi 401
+GET {{baseUrl}}/admin/shipping
+
+### 3. Nhân viên tạo vận đơn cho đơn đã xác nhận (CONFIRMED) - mong đợi 201
+POST {{baseUrl}}/admin/shipping
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "orderId": "{{orderId}}",
+  "carrier": "GHTK",
+  "trackingCode": "GHTK12345678",
+  "carrierFee": 30000
+}
+
+### 4. Không tạo hai vận đơn cho cùng một đơn hàng - mong đợi 409
+POST {{baseUrl}}/admin/shipping
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "orderId": "{{orderId}}",
+  "carrier": "VNPost",
+  "trackingCode": "VNP99999999",
+  "carrierFee": 25000
+}
+
+### 5. Khách hàng xem danh sách vận đơn của mình
+GET {{baseUrl}}/shipping/me?page=1&limit=10
+Authorization: Bearer {{customerToken}}
+
+### 6. Khách hàng xem chi tiết vận đơn theo orderId
+GET {{baseUrl}}/shipping/me/orders/{{orderId}}
+Authorization: Bearer {{customerToken}}
+
+### 7. Quản trị viên xem danh sách tất cả vận đơn (hỗ trợ lọc status, carrier, orderId)
+GET {{baseUrl}}/admin/shipping?page=1&limit=20&status=READY
+Authorization: Bearer {{staffToken}}
+
+### 8. Chuyển trạng thái: READY -> PICKED_UP - mong đợi 200 (đơn hàng tự chuyển sang SHIPPING)
+PATCH {{baseUrl}}/admin/shipping/{{shipmentId}}/status
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "PICKED_UP",
+  "note": "Shipper da lay hang tu kho"
+}
+
+### 9. Chuyển trạng thái: PICKED_UP -> IN_TRANSIT - mong đợi 200
+PATCH {{baseUrl}}/admin/shipping/{{shipmentId}}/status
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "IN_TRANSIT",
+  "note": "Dang van chuyen qua kho trung chuyen"
+}
+
+### 10. Chuyển trạng thái: IN_TRANSIT -> OUT_FOR_DELIVERY - mong đợi 200
+PATCH {{baseUrl}}/admin/shipping/{{shipmentId}}/status
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "OUT_FOR_DELIVERY",
+  "note": "Shipper dang giao hang den nguoi nhan"
+}
+
+### 11. Chuyển trạng thái: DELIVERY_FAILED không có lý do - mong đợi 400
+PATCH {{baseUrl}}/admin/shipping/{{shipmentId}}/status
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "DELIVERY_FAILED"
+}
+
+### 12. Chuyển trạng thái: DELIVERY_FAILED có lý do - mong đợi 200
+PATCH {{baseUrl}}/admin/shipping/{{shipmentId}}/status
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "DELIVERY_FAILED",
+  "note": "Nguoi nhan ban, hen giao lai vao ngay mai"
+}
+
+### 13. Chuyển trạng thái: Giao hàng thành công (DELIVERED) - mong đợi 200
+PATCH {{baseUrl}}/admin/shipping/{{shipmentId}}/status
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "DELIVERED",
+  "note": "Giao hang thanh cong nguoi nhan ky nhan"
+}
+
+### 14. Nhân viên xác nhận thu tiền COD sau khi giao thành công (Module 13) - mong đợi 200
+PATCH {{baseUrl}}/admin/payments/orders/{{orderId}}/confirm
+Authorization: Bearer {{staffToken}}
+

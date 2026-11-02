@@ -1,0 +1,66 @@
+@baseUrl = http://localhost:5000/api
+@customerAToken = THAY_TOKEN_CUSTOMER_A
+@customerBToken = THAY_TOKEN_CUSTOMER_B
+@staffToken = THAY_TOKEN_STAFF
+@productId = THAY_PRODUCT_ID
+@reviewId = THAY_REVIEW_ID
+
+### 1. Xem danh sách đánh giá công khai của sản phẩm (không cần đăng nhập)
+GET {{baseUrl}}/reviews/products/{{productId}}?page=1&limit=10
+
+### 2. Xem tóm tắt điểm trung bình và phân bố sao của sản phẩm (không cần đăng nhập)
+GET {{baseUrl}}/reviews/products/{{productId}}/summary
+
+### 3. Khách hàng xem lịch sử đánh giá của chính mình
+GET {{baseUrl}}/reviews/me?page=1&limit=10
+Authorization: Bearer {{customerAToken}}
+
+### 4. Khách hàng tạo đánh giá mới cho sản phẩm đã nhận hàng
+POST {{baseUrl}}/reviews
+Authorization: Bearer {{customerAToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "rating": 5,
+  "title": "San pham rat tot va dung nhu mo ta",
+  "comment": "Dong goi can than, giao hang nhanh, may chay rat muot ma va em."
+}
+
+### 5. Khách hàng cập nhật đánh giá của mình
+PATCH {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{customerAToken}}
+Content-Type: application/json
+
+{
+  "rating": 4,
+  "title": "Cap nhat sau 1 tuan su dung",
+  "comment": "May van tot, chi co cuc sac hoi nong mot chut khi choi game lien tuc."
+}
+
+### 6. Khách hàng xóa mềm đánh giá của mình
+DELETE {{baseUrl}}/reviews/{{reviewId}}
+Authorization: Bearer {{customerAToken}}
+
+### 7. STAFF/ADMIN xem danh sách tất cả đánh giá cần kiểm duyệt
+GET {{baseUrl}}/admin/reviews?page=1&limit=20&status=VISIBLE
+Authorization: Bearer {{staffToken}}
+
+### 8. STAFF/ADMIN ẩn đánh giá vi phạm (chuyển sang HIDDEN)
+PATCH {{baseUrl}}/admin/reviews/{{reviewId}}/moderation
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "HIDDEN"
+}
+
+### 9. STAFF/ADMIN khôi phục đánh giá bị ẩn (chuyển sang VISIBLE)
+PATCH {{baseUrl}}/admin/reviews/{{reviewId}}/moderation
+Authorization: Bearer {{staffToken}}
+Content-Type: application/json
+
+{
+  "status": "VISIBLE"
+}
+

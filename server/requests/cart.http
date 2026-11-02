@@ -1,0 +1,67 @@
+@baseUrl = http://localhost:5000
+@customerToken = REPLACE_WITH_ACCESS_TOKEN
+@adminToken = REPLACE_WITH_ACCESS_TOKEN
+@productId = 6ada02311f1f5bbee7423650
+
+### 1. Xem giỏ hàng
+GET {{baseUrl}}/api/cart
+Authorization: Bearer {{customerToken}}
+
+### 2. Thêm sản phẩm - mong đợi 200
+POST {{baseUrl}}/api/cart/items
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "quantity": 2
+}
+
+### 3. Xem lại giỏ hàng
+GET {{baseUrl}}/api/cart
+Authorization: Bearer {{customerToken}}
+
+### 4. Cập nhật số lượng - mong đợi 200
+PATCH {{baseUrl}}/api/cart/items/{{productId}}
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "quantity": 5
+}
+
+### 5. Số lượng không hợp lệ - mong đợi 400
+POST {{baseUrl}}/api/cart/items
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "quantity": 100
+}
+
+### 6. Mã sản phẩm không hợp lệ - mong đợi 400
+POST {{baseUrl}}/api/cart/items
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "productId": "abc",
+  "quantity": 1
+}
+
+### 7. Không đăng nhập - mong đợi 401
+GET {{baseUrl}}/api/cart
+
+### 8. ADMIN truy cập giỏ hàng - mong đợi 403
+GET {{baseUrl}}/api/cart
+Authorization: Bearer {{adminToken}}
+
+### 9. Xóa một sản phẩm - mong đợi 200
+DELETE {{baseUrl}}/api/cart/items/{{productId}}
+Authorization: Bearer {{customerToken}}
+
+### 10. Xóa toàn bộ giỏ hàng - mong đợi 200
+DELETE {{baseUrl}}/api/cart
+Authorization: Bearer {{customerToken}}
+

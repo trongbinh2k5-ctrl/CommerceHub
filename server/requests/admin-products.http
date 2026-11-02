@@ -1,0 +1,94 @@
+@baseUrl = http://localhost:5000
+@adminToken = REPLACE_WITH_ACCESS_TOKEN
+@staffToken = REPLACE_WITH_ACCESS_TOKEN
+@customerToken = REPLACE_WITH_ACCESS_TOKEN
+@productId = 6ada02311f1f5bbee7423650
+
+### 1. Không đăng nhập - mong đợi 401
+GET {{baseUrl}}/api/admin/products
+
+### 2. Token CUSTOMER - mong đợi 403
+GET {{baseUrl}}/api/admin/products
+Authorization: Bearer {{customerToken}}
+
+### 3. Token STAFF hoặc ADMIN - mong đợi 200
+GET {{baseUrl}}/api/admin/products
+Authorization: Bearer {{adminToken}}
+
+### 4. Chỉ lấy sản phẩm đã ẩn - mong đợi 200
+GET {{baseUrl}}/api/admin/products?isActive=false&page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### 5. Kiểm tra trạng thái không hợp lệ - mong đợi 400
+GET {{baseUrl}}/api/admin/products?isActive=abc
+Authorization: Bearer {{adminToken}}
+
+### 6. Kiểm tra phân trang không hợp lệ - mong đợi 400
+GET {{baseUrl}}/api/admin/products?page=-1
+Authorization: Bearer {{adminToken}}
+
+### 7. Tìm kiếm, lọc giá, sắp xếp - mong đợi 200
+GET {{baseUrl}}/api/admin/products?search=laptop&minPrice=1000000&maxPrice=30000000&sort=price_asc&page=1&limit=5
+Authorization: Bearer {{adminToken}}
+
+### 8. Nhập thêm 10 sản phẩm vào tồn kho - mong đợi 200
+PATCH {{baseUrl}}/api/admin/products/{{productId}}/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "delta": 10
+}
+
+### 9. Giảm quá số lượng tồn kho - mong đợi 409
+PATCH {{baseUrl}}/api/admin/products/{{productId}}/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "delta": -9999
+}
+
+### 10. delta là số thập phân (1.5) - mong đợi 400
+PATCH {{baseUrl}}/api/admin/products/{{productId}}/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "delta": 1.5
+}
+
+### 11. delta bằng 0 - mong đợi 400
+PATCH {{baseUrl}}/api/admin/products/{{productId}}/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "delta": 0
+}
+
+### 12. ID sai định dạng - mong đợi 400
+PATCH {{baseUrl}}/api/admin/products/invalid-product-id/stock
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "delta": 10
+}
+
+### 13. Cập nhật tồn kho không gửi Token - mong đợi 401
+PATCH {{baseUrl}}/api/admin/products/{{productId}}/stock
+Content-Type: application/json
+
+{
+  "delta": 10
+}
+
+### 14. CUSTOMER cập nhật tồn kho - mong đợi 403
+PATCH {{baseUrl}}/api/admin/products/{{productId}}/stock
+Authorization: Bearer {{customerToken}}
+Content-Type: application/json
+
+{
+  "delta": 10
+}
