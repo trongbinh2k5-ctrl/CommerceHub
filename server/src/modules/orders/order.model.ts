@@ -11,6 +11,8 @@ export enum OrderStatus {
 
 export enum PaymentMethod {
   COD = "COD",
+  VNPAY = "VNPAY",
+  SEPAY = "SEPAY",
 }
 
 const orderItemSchema = new Schema(
@@ -86,6 +88,7 @@ const orderSchema = new Schema(
     couponCode: String,
     subtotal: { type: Number, min: 0 },
     discountAmount: { type: Number, default: 0, min: 0 },
+    shippingFee: { type: Number, default: 0, min: 0 },
     totalAmount: {
       type: Number,
       required: true,

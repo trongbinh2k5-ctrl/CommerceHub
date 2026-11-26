@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { registerUser, loginUser } from "./auth.service";
-import { generateAccessToken } from "./token.service";
+import { startLoginSession, registrationVerification } from './account.service';
+import { emailAvailable, verificationRequired } from './mail.service';
 export const register = async (
   req: Request,
   res: Response,
@@ -27,16 +28,21 @@ export const register = async (
       return;
     }
 
+    if (verificationRequired() && !emailAvailable()) {
+      res.status(503).json({ success: false, message: 'Dịch vụ xác minh email chưa được cấu hình.' });
+      return;
+    }
     const user = await registerUser({
       fullName,
       email,
       password,
     });
 
+    const emailSent = await registrationVerification(user.id);
     res.status(201).json({
       success: true,
-      message: "Registration successful",
-      data: user,
+      message: verificationRequired() && !emailSent ? 'Tài khoản đã tạo. Chưa gửi được email xác minh, vui lòng yêu cầu gửi lại.' : 'Đã tạo tài khoản.',
+      data: { ...user, emailVerified: false, verificationRequired: verificationRequired(), emailSent },
     });
   } catch (error: unknown) {
     if (error instanceof Error && error.message === "EMAIL_ALREADY_EXISTS") {
@@ -92,17 +98,13 @@ export const login = async (
       password,
     });
 
-    const accessToken = generateAccessToken({
-      userId: user.id,
-      role: user.role,
-    });
+    const session = await startLoginSession(req, res, user.id, user.authVersion);
 
     res.status(200).json({
       success: true,
       message: "Login successful",
       data: {
-        user,
-        accessToken,
+        ...session,
       },
     });
   } catch (error: unknown) {

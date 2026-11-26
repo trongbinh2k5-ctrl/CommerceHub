@@ -65,11 +65,11 @@ test('System core: authentication, catalog, addresses, cart and HTTP validation'
       await Product.updateOne({ _id: productId }, { $set: { stock: 10 } });
     });
     await t.test('address CRUD and cross-account isolation', async () => {
-      const input = { fullName: 'QA', phone: '0901234567', province: 'HCM', ward: 'Ward', detail: 'QA address' };
+      const input = { fullName: 'QA', phone: '0901234567', province: 'Hồ Chí Minh', ward: 'Phường Sài Gòn', detail: 'QA address' };
       const r = await api('/api/addresses', 'POST', input, token);
       assert.equal(r.status, 201); addressId = r.body.data._id;
       assert.equal((await api(`/api/addresses/${addressId}`, 'PATCH', { detail: 'Changed' }, otherToken)).status, 404);
-      assert.equal((await api(`/api/addresses/${addressId}`, 'PATCH', { detail: 'Changed' }, token)).status, 200);
+      assert.equal((await api(`/api/addresses/${addressId}`, 'PATCH', { detail: 'Changed address' }, token)).status, 200);
       assert.equal((await api('/api/addresses', 'POST', { ...input, phone: 'bad' }, token)).status, 400);
     });
     await t.test('cart add, quantity validation, update, delete and clear', async () => {

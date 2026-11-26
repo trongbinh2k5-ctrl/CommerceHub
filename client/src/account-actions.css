@@ -1,0 +1,31 @@
+.account-devices-column {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.account-devices-column > .account-session-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.account-session-actions > .account-logout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: auto;
+  min-width: 150px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid #b42318;
+  border-radius: 8px;
+  background: #b42318;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.account-session-actions > .account-logout:hover { background: #912018; border-color: #912018; }
+.account-session-actions > .account-logout:focus-visible { outline: 3px solid #e58279; outline-offset: 3px; }

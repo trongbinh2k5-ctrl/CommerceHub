@@ -7,6 +7,7 @@ type CartResult =
   | { status: "SUCCESS" }
   | { status: "NOT_FOUND" }
   | { status: "UNAVAILABLE" }
+  | { status: "INSUFFICIENT_STOCK" }
   | { status: "LIMIT_EXCEEDED" };
 
 export const isValidCartProductId = (id: unknown): id is string =>
@@ -81,11 +82,18 @@ export const getCart = async (userId: string) => {
   const items = cart.items.map((item) => {
     const product = productMap.get(item.productId.toString());
 
-    const available = Boolean(
+    const purchasable = Boolean(
       product?.isActive &&
       (!product.categoryId ||
         activeCategoryIds.has(product.categoryId.toString())),
     );
+    const stock = product?.stock ?? 0;
+    const available = purchasable && stock >= item.quantity;
+    const unavailableReason = !purchasable
+      ? "UNAVAILABLE"
+      : !available
+        ? "INSUFFICIENT_STOCK"
+        : null;
 
     if (!available) {
       unavailableCount += 1;
@@ -102,10 +110,13 @@ export const getCart = async (userId: string) => {
     return {
       productId: item.productId.toString(),
       name: product?.name ?? null,
+      imageUrl: product?.imageUrl || '',
       price,
       quantity: item.quantity,
       subtotal,
       available,
+      stock,
+      unavailableReason,
     };
   });
 
@@ -139,7 +150,7 @@ export const addCartItem = async (
   }
 
   const existingItem = cart.items.find(
-    (item) => item.productId.toString() === productId,
+    (item) => item.productId.equals(productId),
   );
 
   if (existingItem) {
@@ -147,8 +158,15 @@ export const addCartItem = async (
       return { status: "LIMIT_EXCEEDED" };
     }
 
+    if (existingItem.quantity + quantity > product.stock) {
+      return { status: "INSUFFICIENT_STOCK" };
+    }
+
     existingItem.quantity += quantity;
   } else {
+    if (quantity > product.stock) {
+      return { status: "INSUFFICIENT_STOCK" };
+    }
     cart.items.push({
       productId: new Types.ObjectId(productId),
       quantity,
@@ -170,7 +188,7 @@ export const updateCartItem = async (
   if (!cart) return { status: "NOT_FOUND" };
 
   const item = cart.items.find(
-    (entry) => entry.productId.toString() === productId,
+    (entry) => entry.productId.equals(productId),
   );
 
   if (!item) return { status: "NOT_FOUND" };
@@ -178,6 +196,8 @@ export const updateCartItem = async (
   const product = await findAvailableProduct(productId);
 
   if (!product) return { status: "UNAVAILABLE" };
+
+  if (quantity > product.stock) return { status: "INSUFFICIENT_STOCK" };
 
   item.quantity = quantity;
   await cart.save();
@@ -194,7 +214,7 @@ export const removeCartItem = async (
   if (!cart) return { status: "NOT_FOUND" };
 
   const index = cart.items.findIndex(
-    (item) => item.productId.toString() === productId,
+    (item) => item.productId.equals(productId),
   );
 
   if (index === -1) return { status: "NOT_FOUND" };

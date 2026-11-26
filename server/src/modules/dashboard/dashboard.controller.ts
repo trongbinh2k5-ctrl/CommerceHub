@@ -10,10 +10,6 @@ import {
   RevenuePeriod,
 } from "./dashboard.service";
 
-const getQueryString = (value: unknown): string | undefined => {
-  return typeof value === "string" ? value : undefined;
-};
-
 const parseInteger = (
   value: unknown,
   defaultValue: number,
@@ -64,7 +60,7 @@ const addUtcDays = (date: Date, days: number): Date => {
 };
 
 const parseRevenueFilter = (req: Request) => {
-  const period = getQueryString(req.query.period) ?? "day";
+  const period = req.query.period ?? "day";
 
   if (period !== "day" && period !== "month") {
     throw new DashboardError(400, "period must be day or month");

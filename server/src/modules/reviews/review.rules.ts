@@ -52,10 +52,20 @@ export const validateReviewInput = (value: unknown): ReviewInput => {
     );
   }
 
+  if (
+    body.version !== undefined &&
+    (typeof body.version !== "number" ||
+      !Number.isSafeInteger(body.version) ||
+      body.version < 0)
+  ) {
+    throw new ReviewError(400, "Review version must be a non-negative integer");
+  }
+
   return {
     rating: body.rating,
     title,
     comment,
+    ...(body.version === undefined ? {} : { version: body.version as number }),
   };
 };
 

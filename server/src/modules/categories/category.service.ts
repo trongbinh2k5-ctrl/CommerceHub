@@ -1,15 +1,18 @@
 import { Category } from "./category.model";
 import { isValidObjectId } from "mongoose";
+import { availableCategorySlug } from './category-slug';
 type CreateCategoryInput = {
   name: string;
-  slug: string;
+  slug?: string;
   description?: string;
 };
 
 export const createCategory = async (data: CreateCategoryInput) => {
-  const category = await Category.create(data);
-
-  return category;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try { return await Category.create({ ...data, slug: data.slug || await availableCategorySlug(data.name) }); }
+    catch (e: any) { if (data.slug || e?.code !== 11000 || attempt === 3) throw e; }
+  }
+  throw new Error('Không thể tạo đường dẫn danh mục.');
 };
 
 export const getActiveCategories = async () => {

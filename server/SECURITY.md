@@ -1,16 +1,25 @@
 # Bảo mật backend
 
-Cập nhật 02/11/2026.
+Cập nhật 06/11/2026.
 
 ## Các lớp bảo vệ đã bổ sung
 
+- Admin tạo/cấp lại mật khẩu nhân viên phải nhập lại mật khẩu hiện tại; giới hạn riêng 10 yêu cầu/IP/15 phút cho mỗi endpoint cấp. Mật khẩu tạm ngẫu nhiên có hạn 24 giờ, bcrypt, chỉ trả ở phản hồi cấp; không lưu rõ hoặc ghi vào nhật ký. STAFF/ADMIN đổi/reset mật khẩu dùng tối thiểu 10 ký tự.
+- `mustChangePassword` được kiểm tra tại middleware xác thực: chỉ cho đọc tài khoản và đổi mật khẩu trong giai đoạn thiết lập; không chỉ ẩn nút ở frontend. Hết hạn mật khẩu tạm bị chặn cả đăng nhập, refresh và đổi mật khẩu qua phiên tạm. Reset bằng token email hợp lệ vẫn là luồng khôi phục riêng.
+- Quản lý quyền/trạng thái, cấp lại mật khẩu và đổi mật khẩu thu hồi phiên/challenge cũ. Nhật ký cho các thao tác quan trọng được ghi trong cùng transaction; lỗi audit làm hoàn tác nghiệp vụ. Nhật ký chỉ đọc bởi ADMIN; không có API sửa/xóa. Chi tiết phạm vi trong [STAFF-MANAGEMENT.md](../STAFF-MANAGEMENT.md).
+
 - Helmet: CSP, chống MIME sniffing, hạn chế nhúng trang và các security header mặc định; ẩn `X-Powered-By`. HSTS bật khi `NODE_ENV=production`.
-- CORS: chỉ cấp quyền đọc response trong trình duyệt cho origin có trong `CORS_ORIGINS`; không dùng wildcard hay cookie credentials. CORS không thay thế xác thực và không ngăn client ngoài trình duyệt gửi request.
+- CORS: chỉ cấp quyền đọc response trong trình duyệt cho origin có trong `CORS_ORIGINS`, có credentials để dùng refresh cookie; không dùng wildcard. CORS không thay thế xác thực và không ngăn client ngoài trình duyệt gửi request.
 - API: tối đa 300 request/IP/phút; đăng nhập 20 request/IP/15 phút; đăng ký 10 request/IP/giờ. Vượt mức trả JSON 429 và `Retry-After`. Tính cả yêu cầu thành công và thất bại.
 - Không tin `X-Forwarded-For` mặc định. Chỉ bật trust proxy với các IP/CIDR khai báo rõ trong `TRUSTED_PROXIES`.
-- JSON giới hạn 32 KiB; JSON lỗi trả 400 và body quá lớn trả 413 bằng thông báo cố định, không phản chiếu nội dung request.
+- JSON mặc định giới hạn 32 KiB; sản phẩm/chính sách giới hạn 96 KiB cho nội dung có nhiều trường. Upload ảnh giới hạn 5 MiB và chỉ nhận PNG/JPEG/WebP có chữ ký phù hợp. JSON lỗi trả 400 và body quá lớn trả 413, không phản chiếu nội dung request.
 - API trả `Cache-Control: no-store`; endpoint không tồn tại trả JSON cố định; lỗi 5xx qua error handler không đưa thông báo nội bộ cho client.
 - JWT tiếp tục giới hạn HS256 và kiểm tra tài khoản trong database; bổ sung kiểm tra subject là ObjectId trước khi truy vấn.
+- Access token 15 phút ở bộ nhớ frontend; refresh cookie HttpOnly/SameSite=Lax, Secure khi production, hạn 30 ngày. Chỉ lưu hash refresh token, xoay vòng nguyên tử; kiểm tra Origin/Sec-Fetch-Site khi refresh/logout. Nên phục vụ frontend/API cùng origin.
+- JWT mang mã phiên và phiên bản xác thực; middleware đối chiếu database. Đổi/reset mật khẩu, đổi email, khóa hoặc thay đổi quyền thu hồi phiên cũ. Người dùng chỉ đọc/thu hồi phiên của mình.
+- Token xác minh/khôi phục ngẫu nhiên 32 byte, chỉ lưu hash, TTL và kiểm tra hết hạn ở truy vấn. Tiêu thụ một lần trong transaction, không tự xác nhận khi mở URL. Reset 30 phút; xác minh 60 phút. Giới hạn riêng các endpoint gửi/tiêu thụ token.
+- Mọi yêu cầu sau mua và thông báo được giới hạn theo chủ sở hữu. Điều chỉnh kho, đặt/hủy đơn và phản hồi sau mua ghi lịch sử/thông báo trong transaction tương ứng.
+- Ứng dụng mặc định giữ hạn mức API 300/IP/phút và đăng nhập 20/IP/15 phút. Riêng script demo bị giới hạn localhost/database tạm, từ chối chạy production, dùng ngân sách 10.000 API/IP/phút và 200 đăng nhập/IP/15 phút để chạy toàn bộ kiểm thử giao diện. Giới hạn đăng ký không thay đổi. Kiểm thử security dùng ứng dụng mặc định và xác nhận giới hạn đăng nhập vẫn trả 429 khi vượt mức.
 - Đăng ký/đăng nhập giới hạn mật khẩu 72 byte UTF-8 để tránh bcrypt cắt ngầm mật khẩu nhiều byte; giới hạn email 254 ký tự và tên đăng ký 100 ký tự.
 - Khi khởi động bằng `src/index.ts`, JWT secret bắt buộc tối thiểu 32 byte; production yêu cầu khai báo CORS. HTTP request timeout 30 giây và header timeout 15 giây.
 

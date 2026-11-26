@@ -13,7 +13,7 @@ export function createRequestLimiter(limit: number, windowMs: number) {
   });
 }
 
-export function installSecurity(app: Express) {
+export function installSecurity(app: Express, apiRateLimit = 300, loginRateLimit = 20) {
   app.disable("x-powered-by");
   // Trust only explicitly configured proxy addresses/subnets, never arbitrary headers.
   const proxies = process.env.TRUSTED_PROXIES?.split(",").map(v => v.trim()).filter(Boolean);
@@ -21,6 +21,7 @@ export function installSecurity(app: Express) {
   app.use(helmet({ strictTransportSecurity: process.env.NODE_ENV === "production" ? undefined : false }));
   const origins = new Set((process.env.CORS_ORIGINS ?? "").split(",").map(v => v.trim()).filter(Boolean));
   app.use(cors({
+    credentials: true,
     origin: (origin, callback) => callback(null, !!origin && origins.has(origin)),
     methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key"],
@@ -31,8 +32,8 @@ export function installSecurity(app: Express) {
     res.setHeader("Cache-Control", "no-store");
     next();
   });
-  app.use("/api", createRequestLimiter(300, 60_000));
+  app.use("/api", createRequestLimiter(apiRateLimit, 60_000));
   // Count all attempts so successful requests cannot be used to bypass the budget.
-  app.use("/api/auth/login", createRequestLimiter(20, 15 * 60_000));
+  app.use("/api/auth/login", createRequestLimiter(loginRateLimit, 15 * 60_000));
   app.use("/api/auth/register", createRequestLimiter(10, 60 * 60_000));
 }

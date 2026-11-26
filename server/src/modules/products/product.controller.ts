@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import { parseProductQuery } from "./product-query.parser";
+import { isValidProductImage } from "./product-image";
+import { parseProductDetails } from './product-details';
+import type { ProductDetails } from './product-details';
 import { Request, Response, NextFunction } from "express";
 import {
   getAllProducts,
@@ -48,7 +51,13 @@ export const getProducts = async (req: Request, res: Response) => {
 
 export const addProduct = async (req: Request, res: Response) => {
   try {
-    const { name, sku, price, description, categoryId } = req.body ?? {};
+    let details;
+    try { details = parseProductDetails(req.body ?? {}); } catch (e) { res.status(400).json({ success: false, message: (e as Error).message }); return; }
+    const { name, sku, price, description, categoryId, imageUrl, stock } = req.body ?? {};
+    if (imageUrl !== undefined && !isValidProductImage(imageUrl)) {
+      res.status(400).json({ success: false, message: "Invalid product image URL" });
+      return;
+    }
 
     if (
       typeof name !== "string" ||
@@ -57,7 +66,9 @@ export const addProduct = async (req: Request, res: Response) => {
       !sku.trim() ||
       typeof price !== "number" ||
       !Number.isSafeInteger(price) ||
-      price < 0
+      price < 0 ||
+      (description !== undefined && typeof description !== "string") ||
+      (stock !== undefined && (!Number.isSafeInteger(stock) || stock < 0))
     ) {
       res.status(400).json({
         success: false,
@@ -76,12 +87,15 @@ export const addProduct = async (req: Request, res: Response) => {
       return;
     }
     const product = await createProduct({
+      ...details,
       name: name.trim(),
       sku: sku.trim(),
       price,
       description: typeof description === "string" ? description : "",
       categoryId,
-    });
+      imageUrl,
+      stock,
+    }, req.user?.userId);
 
     if (!product) {
       res.status(404).json({
@@ -119,6 +133,8 @@ export const addProduct = async (req: Request, res: Response) => {
 };
 export const editProduct = async (req: Request, res: Response) => {
   try {
+    let details;
+    try { details = parseProductDetails(req.body ?? {}); } catch (e) { res.status(400).json({ success: false, message: (e as Error).message }); return; }
     const { id } = req.params;
 
     if (typeof id !== "string" || !mongoose.isValidObjectId(id)) {
@@ -129,14 +145,23 @@ export const editProduct = async (req: Request, res: Response) => {
       return;
     }
 
-    const { name, sku, price, description, categoryId } = req.body ?? {};
-    const data: {
+    const { name, sku, price, description, categoryId, imageUrl } = req.body ?? {};
+    const data: ProductDetails & {
       name?: string;
       sku?: string;
       price?: number;
       description?: string;
-      categoryId?: string;
-    } = {};
+      categoryId?: string | null;
+      imageUrl?: string;
+    } = { ...details };
+
+    if (imageUrl !== undefined) {
+      if (!isValidProductImage(imageUrl)) {
+        res.status(400).json({ success: false, message: "Invalid product image URL" });
+        return;
+      }
+      data.imageUrl = imageUrl;
+    }
 
     if (name !== undefined) {
       if (typeof name !== "string" || !name.trim()) {
@@ -188,8 +213,8 @@ export const editProduct = async (req: Request, res: Response) => {
 
     if (categoryId !== undefined) {
       if (
-        typeof categoryId !== "string" ||
-        !mongoose.isValidObjectId(categoryId)
+        categoryId !== null &&
+        (typeof categoryId !== "string" || !mongoose.isValidObjectId(categoryId))
       ) {
         res.status(400).json({
           success: false,
@@ -209,7 +234,7 @@ export const editProduct = async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await updateProduct(id, data);
+    const result = await updateProduct(id, data, req.user?.userId);
 
     if (result.status === "CATEGORY_NOT_FOUND") {
       res.status(404).json({
@@ -274,7 +299,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
       return;
     }
 
-    const product = await softDeleteProduct(id);
+    const product = await softDeleteProduct(id, req.user?.userId);
 
     if (!product) {
       res.status(404).json({
@@ -311,7 +336,7 @@ export const restoreDeletedProduct = async (req: Request, res: Response) => {
       return;
     }
 
-    const product = await restoreProduct(id);
+    const product = await restoreProduct(id, req.user?.userId);
 
     if (!product) {
       res.status(404).json({
@@ -430,7 +455,9 @@ export const changeProductStock = async (
       return;
     }
 
-    const product = await adjustProductStock(id, delta);
+    const reason=req.body?.reason;
+    if(reason!==undefined && (typeof reason!=='string'||!reason.trim()||reason.length>500)){res.status(400).json({message:'Lý do điều chỉnh không hợp lệ.'});return;}
+    const product = await adjustProductStock(id, delta, req.user?.userId, typeof reason==='string'?reason.trim():undefined);
 
     if (!product) {
       res.status(409).json({

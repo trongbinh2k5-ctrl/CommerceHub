@@ -1,6 +1,7 @@
 import mongoose, { ClientSession } from "mongoose";
 import { Address } from "./address.model";
 import { User } from "../auth/user.model";
+import { validateDeliveryAddress } from './address-catalog';
 
 export class AddressError extends Error {
   constructor(
@@ -96,6 +97,7 @@ export async function listAddresses(userId: string) {
 }
 
 export async function createAddress(userId: string, input: AddressInput) {
+  Object.assign(input,validateDeliveryAddress(input));
   return executeWrite(userId, async (session) => {
     const count = await Address.countDocuments({
       userId,
@@ -126,6 +128,9 @@ export async function updateAddress(
   input: AddressUpdate,
 ) {
   return executeWrite(userId, async (session) => {
+    const existing=await Address.findOne({_id:addressId,userId}).session(session);
+    if(!existing)throw new AddressError(404,'Không tìm thấy địa chỉ.');
+    Object.assign(input,validateDeliveryAddress({...existing.toObject(),...input}));
     const address = await Address.findOneAndUpdate(
       { _id: addressId, userId },
       { $set: input },

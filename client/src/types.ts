@@ -1,0 +1,13 @@
+export type Role = 'CUSTOMER' | 'STAFF' | 'ADMIN';
+export interface User { id: string; fullName: string; email: string; role: Role; phone?: string; emailVerified?: boolean; mustChangePassword?:boolean }
+export interface Category { _id: string; name: string; slug: string; description?: string; isActive: boolean }
+export interface Product { _id: string; name: string; sku: string; price: number; stock: number; description: string; imageUrl?: string; categoryId?: Category | string | null; isActive: boolean; brand?: string; modelName?: string; condition?: string; warrantyText?: string; origin?: string; bundle?: string; variantGroup?: string; variantLabel?: string; gallery?: string[]; specifications?: {label: string; value: string}[] }
+export interface Address { _id: string; fullName: string; phone: string; province: string; ward: string; detail: string; label?: string; isDefault: boolean }
+export interface Cart { items: { productId: string; name: string | null; imageUrl?:string; price: number | null; quantity: number; subtotal: number | null; stock: number; unavailableReason: 'UNAVAILABLE' | 'INSUFFICIENT_STOCK' | null; available: boolean }[]; totalQuantity: number; totalAmount: number; unavailableCount: number }
+export interface Order { _id: string; status: string; createdAt: string; totalAmount: number; discountAmount: number; shippingFee?: number; subtotal?:number; couponCode?:string; paymentMethod: string; shippingAddress: Address; items: { productId: string; name: string; sku: string; price: number; quantity: number; subtotal: number }[] }
+export interface Review { _id: string; productId: string; title: string; comment: string; rating: number; status: string; createdAt: string; __v?: number }
+export interface ReviewPage { items: Review[]; pagination: { page: number; total: number; totalPages: number } }
+export interface Shipment { _id: string; orderId: string; status: string; carrier: string; trackingCode: string; events?: { toStatus: string; note?: string; createdAt: string }[] }
+export interface Payment { _id: string; orderId: string; amount: number; status: string; refundStatus?:'REQUESTED'|'PROCESSING'|'COMPLETED'|null;refundAmount?:number;refundRequestedAt?:string|null;refundProcessingAt?:string|null;refundRecipientSubmittedAt?:string|null;refundedAt?:string|null;refundReference?:string }
+export interface Coupon { _id: string; code: string; type: string; value: number; usedCount: number; maxUses: number; isActive: boolean; startsAt: string; expiresAt: string }
+export interface Envelope<T> { data: T; message?: string; pagination?: { page: number; total: number; totalPages: number } }

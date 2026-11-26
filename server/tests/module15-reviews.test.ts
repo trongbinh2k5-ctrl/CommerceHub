@@ -48,8 +48,8 @@ test(
         userId: u._id,
         fullName: `Customer Rev ${i}`,
         phone: "0901234567",
-        province: "Ha Noi",
-        ward: "Thach That",
+        province: 'Hồ Chí Minh',
+        ward: 'Phường Sài Gòn',
         detail: `So ${i + 1} Pho Review`,
       })),
     );
@@ -489,13 +489,18 @@ test(
       await t.test(
         "19. Hai yêu cầu cập nhật cùng phiên bản không ghi đè nhau",
         async () => {
+          const previous = await Review.findById(review1Id).lean();
+          assert.ok(previous);
+          const version = previous.__v;
           const [resA, resB] = await Promise.all([
             api(`/reviews/${review1Id}`, 0, "PATCH", {
+              version,
               rating: 5,
               title: "Cap nhat dong thoi nhanh A",
               comment: "Noi dung cap nhat tu tien trinh A hoan toan hop le.",
             }),
             api(`/reviews/${review1Id}`, 0, "PATCH", {
+              version,
               rating: 3,
               title: "Cap nhat dong thoi nhanh B",
               comment: "Noi dung cap nhat tu tien trinh B hoan toan hop le.",
@@ -504,6 +509,19 @@ test(
 
           const statuses = [resA.status, resB.status].sort();
           assert.deepEqual(statuses, [200, 409]);
+          const winner = resA.status === 200 ? resA : resB;
+          const saved = await Review.findById(review1Id).lean();
+          assert.equal(saved!.__v, version + 1);
+          assert.equal(saved!.rating, winner.body.data.rating);
+
+          // A stale editor must also be rejected after the other save finishes.
+          const stale = await api(`/reviews/${review1Id}`, 0, "PATCH", {
+            version,
+            rating: 1,
+            title: "Old editor overwrites new content",
+            comment: "This older form must not overwrite the saved review.",
+          });
+          assert.equal(stale.status, 409);
         },
       );
 
@@ -543,11 +561,12 @@ test(
         const summaryDeleted = await api(
           `/reviews/products/${product1.id}/summary`,
         );
+        const remainingReview = await Review.findById(review1Id).lean();
+        assert.ok(remainingReview);
         assert.equal(summaryDeleted.status, 200);
         assert.equal(summaryDeleted.body.data.totalReviews, 1);
-        assert.equal(summaryDeleted.body.data.averageRating, 5);
-        assert.equal(summaryDeleted.body.data.distribution["5"], 1);
-        assert.equal(summaryDeleted.body.data.distribution["3"], 0);
+        assert.equal(summaryDeleted.body.data.averageRating, remainingReview.rating);
+        assert.equal(summaryDeleted.body.data.distribution[String(remainingReview.rating)], 1);
       });
     } finally {
       server.close();

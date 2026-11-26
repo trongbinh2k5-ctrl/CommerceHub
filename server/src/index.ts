@@ -1,11 +1,14 @@
 import "dotenv/config";
-import app from "./app";
+import { startSepaySync } from './modules/payments/sepay-sync';
+import {createApp} from "./app";
+import {applyHostedDefaults} from './config/hosted-environment';
 import { connectDatabase } from "./config/database";
 
 const PORT = Number(process.env.PORT) || 5000;
 
 const startServer = async () => {
   try {
+    applyHostedDefaults();
     const secret = process.env.JWT_ACCESS_SECRET;
     if (!secret || Buffer.byteLength(secret, "utf8") < 32) {
       throw new Error("JWT_ACCESS_SECRET must contain at least 32 bytes");
@@ -14,8 +17,9 @@ const startServer = async () => {
       throw new Error("CORS_ORIGINS must be configured in production");
     }
     await connectDatabase();
+    startSepaySync();
 
-    const server = app.listen(PORT, () => {
+    const server = createApp().listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
     server.requestTimeout = 30_000;

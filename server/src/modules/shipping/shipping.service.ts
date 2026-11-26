@@ -1,6 +1,7 @@
 import mongoose, { Types, type ClientSession } from "mongoose";
 
 import { Shipment } from "./shipping.model";
+import { GhnBooking } from './ghn.model';
 
 import {
   MAX_DELIVERY_ATTEMPTS,
@@ -12,8 +13,10 @@ import {
   type ShippingStatus,
 } from "./shipping.types";
 
-import { Order } from "../orders/order.model";
+import { Order, OrderStatus } from "../orders/order.model";
 import { Payment } from "../payments/payment.model";
+import { Notification } from '../operations/operations.models';
+import { recordAudit } from '../operations/audit.service';
 
 export class ShippingError extends Error {
   constructor(
@@ -103,6 +106,7 @@ export interface CreateShipmentInput {
 export async function createShipment(
   input: CreateShipmentInput,
   actorId: string,
+  ghn?: {bookingId:string},
 ) {
   const orderId = objectId(input.orderId, "orderId");
 
@@ -128,6 +132,10 @@ export async function createShipment(
   }
 
   return inTransaction(async (session) => {
+    const booking=await GhnBooking.findOne({orderId,state:{$ne:'CANCELLED'}}).session(session);
+    if(booking&&(!ghn||booking.id!==ghn.bookingId))throw new ShippingError('Đơn đang có yêu cầu GHN. Đồng bộ GHN trước khi tạo vận đơn khác.',409);
+    if(ghn&&!booking)throw new ShippingError('Thiếu yêu cầu GHN hợp lệ.',409);
+    if(ghn&&booking?.state==='CANCEL_CHECK')throw new ShippingError('Yêu cầu GHN đang đối soát hủy; không tạo vận đơn.',409);
     const order = await Order.findById(orderId).session(session);
 
     if (!order) {
@@ -144,11 +152,12 @@ export async function createShipment(
 
     if (
       !payment ||
-      payment.status !== "PENDING" ||
+      payment.status !== (order.paymentMethod !== 'COD' ? 'PAID' : 'PENDING') ||
+      payment.method !== order.paymentMethod ||
       !payment.userId.equals(order.userId) ||
       payment.amount !== order.totalAmount
     ) {
-      throw new ShippingError("Order requires a matching PENDING payment", 409);
+      throw new ShippingError("Order requires a matching COD pending or online paid payment", 409);
     }
 
     const existingShipment = await Shipment.exists({
@@ -172,6 +181,18 @@ export async function createShipment(
       throw new ShippingError("Order shipping address is incomplete", 409);
     }
 
+    // Write the order inside this transaction so cancellation cannot commit
+    // between the status check and creation of its READY shipment.
+    const lockedOrder = await Order.updateOne(
+      { _id: orderId, status: OrderStatus.CONFIRMED },
+      { $inc: { __v: 1 } },
+      { session },
+    );
+
+    if (lockedOrder.modifiedCount !== 1) {
+      throw new ShippingError("Order changed concurrently", 409);
+    }
+
     const now = new Date();
 
     const [shipment] = await Shipment.create(
@@ -183,6 +204,8 @@ export async function createShipment(
           trackingCode,
 
           carrierFee: input.carrierFee,
+          provider:ghn?'GHN':'MANUAL',
+          ...(ghn?{providerStatus:'ready_to_pick'}:{}),
 
           shippingAddress: {
             fullName: address.fullName,
@@ -211,6 +234,7 @@ export async function createShipment(
       { session },
     );
 
+    await recordAudit(staffId,'SHIPMENT_UPDATED','SHIPMENT',shipment!._id,'Tạo vận đơn.',[{field:'status',before:null,after:'READY'},{field:'trackingCode',before:null,after:trackingCode}],session);
     return shipment;
   });
 }
@@ -247,6 +271,7 @@ export async function updateShipmentStatus(
     if (!shipment) {
       throw new ShippingError("Shipment not found", 404);
     }
+    if(shipment.provider==='GHN')throw new ShippingError('Vận đơn GHN phải đồng bộ từ hãng, không sửa trạng thái thủ công.',409);
 
     if (shipment.status === next) {
       return shipment;
@@ -271,13 +296,14 @@ export async function updateShipmentStatus(
 
     if (
       !payment ||
+      payment.method !== order.paymentMethod ||
       !payment.userId.equals(order.userId) ||
       payment.amount !== order.totalAmount
     ) {
       throw new ShippingError("Payment/order mismatch", 409);
     }
 
-    if (payment.status !== "PENDING") {
+    if (payment.status !== (order.paymentMethod !== 'COD' ? 'PAID' : 'PENDING')) {
       throw new ShippingError(
         "Cannot change shipment after payment is finalized",
         409,
@@ -396,7 +422,7 @@ export async function updateShipmentStatus(
       }
     }
 
-    if (next === "RETURNED") {
+    if (next === "RETURNED" && order.paymentMethod === 'COD') {
       const paymentUpdate = await (Payment as any).updateOne(
         {
           _id: payment._id,
@@ -419,21 +445,31 @@ export async function updateShipmentStatus(
       // Hàng hoàn phải được kiểm tra thực tế.
     }
 
+    const labels: Record<string,string> = {PICKED_UP:'Đã bàn giao cho vận chuyển',IN_TRANSIT:'Đơn hàng đang trung chuyển',OUT_FOR_DELIVERY:'Đơn hàng đang được giao',DELIVERY_FAILED:'Chưa giao được đơn hàng',RETURNING:'Đơn hàng đang hoàn về',RETURNED:'Đơn hàng đã hoàn về',DELIVERED:'Đơn hàng đã giao thành công'};
+    await Notification.create([{userId:order.userId,title:labels[next] || 'Cập nhật vận chuyển',message:note || `Vận đơn ${shipment.trackingCode} đã cập nhật trạng thái.`,href:`/orders/${order._id}`,dedupeKey:`shipment:${shipment.id}:${updated.events.length}`}],{session});
+    await recordAudit(staffId,'SHIPMENT_UPDATED','SHIPMENT',shipment._id,note||'Cập nhật trạng thái vận chuyển.',[{field:'status',before:shipment.status,after:next}],session);
     return updated;
   });
 }
 
 const pagination = (pageRaw: unknown, limitRaw: unknown) => {
-  const page = pageRaw === undefined ? 1 : Number(pageRaw);
-
-  const limit = limitRaw === undefined ? 20 : Number(limitRaw);
+  const parse = (value: unknown, fallback: number) => {
+    if (value === undefined) return fallback;
+    if (typeof value !== "string" || !/^[1-9]\d*$/.test(value)) {
+      throw new ShippingError("Invalid pagination", 400);
+    }
+    return Number(value);
+  };
+  const page = parse(pageRaw, 1);
+  const limit = parse(limitRaw, 20);
 
   if (
     !Number.isSafeInteger(page) ||
     page < 1 ||
     !Number.isSafeInteger(limit) ||
     limit < 1 ||
-    limit > 100
+    limit > 100 ||
+    !Number.isSafeInteger((page - 1) * limit)
   ) {
     throw new ShippingError("Invalid pagination", 400);
   }

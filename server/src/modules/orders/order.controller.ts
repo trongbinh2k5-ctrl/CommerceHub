@@ -13,7 +13,8 @@ import {
 
 import { isValidIdempotencyKey } from "./checkout-idempotency";
 
-import { OrderStatus } from "./order.model";
+import { Order, OrderStatus } from "./order.model";
+import { listOrderRecords } from '../operations/list-query';
 
 const handleOrderError = (
   error: unknown,
@@ -52,7 +53,8 @@ export const createMyOrder = async (
   next: NextFunction,
 ) => {
   try {
-    const { addressId, couponCode } = req.body ?? {};
+    const { addressId, couponCode, expectedTotal, paymentMethod } = req.body ?? {};
+    if (expectedTotal !== undefined && (!Number.isSafeInteger(expectedTotal) || expectedTotal < 0)) { res.status(400).json({ success: false, message: 'Tổng tiền xác nhận không hợp lệ.' }); return; }
 
     const checkoutKey = req.get("Idempotency-Key");
 
@@ -78,6 +80,8 @@ export const createMyOrder = async (
       addressId,
       checkoutKey,
       couponCode,
+      expectedTotal,
+      paymentMethod,
     );
 
     res.status(replayed ? 200 : 201).json({
@@ -99,6 +103,7 @@ export const getMyOrderList = async (
   next: NextFunction,
 ) => {
   try {
+    if (Object.keys(req.query).length) { res.json({success:true,...await listOrderRecords(Order,req.query,Object.values(OrderStatus),req.user!.userId)}); return; }
     const orders = await getMyOrders(req.user!.userId);
 
     res.json({
@@ -174,6 +179,7 @@ export const getAdminOrderList = async (
   next: NextFunction,
 ) => {
   try {
+    if (Object.keys(req.query).length) { res.json({success:true,...await listOrderRecords(Order,req.query,Object.values(OrderStatus))}); return; }
     const orders = await getAllOrders();
 
     res.json({

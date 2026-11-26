@@ -244,7 +244,9 @@ export const updateMyReview = async (
     throw new ReviewError(409, "Deleted reviews cannot be edited");
   }
 
-  const version = review.get("__v") as number;
+  // A version supplied by the editor prevents an older tab from overwriting
+  // changes committed since that editor loaded the review.
+  const version = input.version ?? (review.get("__v") as number);
 
   const updated = await Review.findOneAndUpdate(
     {

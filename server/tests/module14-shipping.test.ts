@@ -44,8 +44,8 @@ test("Module 14: Shipping Module - 22 Test Scenarios", { timeout: 300000 }, asyn
       userId: u._id,
       fullName: `Customer ${i}`,
       phone: "0901234567",
-      province: "Ha Noi",
-      ward: "Thach That",
+      province: 'Hồ Chí Minh',
+      ward: 'Phường Sài Gòn',
       detail: `So ${i + 1} Nguyen Trai`,
     }))
   );
@@ -536,6 +536,58 @@ test("Module 14: Shipping Module - 22 Test Scenarios", { timeout: 300000 }, asyn
 
       const resBadLimit = await api("/admin/shipping?limit=500", 2, "GET");
       assert.equal(resBadLimit.status, 400);
+
+      for (const query of ["page=1&page=1", "page=1e2", "page=1.0", "page=9007199254740991&limit=100"]) {
+        const invalid = await api(`/admin/shipping?${query}`, 2, "GET");
+        assert.equal(invalid.status, 400);
+      }
+    });
+
+    await t.test("Shipment creation cannot commit after cancellation of its order", async (t) => {
+      const { orderId, product } = await createConfirmedOrder(0, 10, 1);
+      let resume!: () => void;
+      let reachedSnapshot!: () => void;
+      const paused = new Promise<void>(resolve => { reachedSnapshot = resolve; });
+      const released = new Promise<void>(resolve => { resume = resolve; });
+      let gated = false;
+      const findOne = Shipment.collection.findOne.bind(Shipment.collection);
+      const mock = t.mock.method(Shipment.collection, "findOne", async (...args: any[]) => {
+        const result = await (findOne as any)(...args);
+        // Hold the actual database snapshot while the other HTTP request
+        // cancels the order. All database reads and writes remain real.
+        if (!gated && String(args[0]?.orderId) === orderId && args[1]?.session) {
+          gated = true;
+          reachedSnapshot();
+          await released;
+        }
+        return result;
+      });
+
+      const creation = api("/admin/shipping", 2, "POST", {
+        orderId,
+        carrier: "GHTK",
+        trackingCode: `CANCEL-RACE-${++seq}`,
+        carrierFee: 30000,
+      });
+
+      try {
+        await paused;
+        const cancellation = await api(`/admin/orders/${orderId}/status`, 2, "PATCH", {
+          status: "CANCELLED",
+        });
+        resume();
+        const created = await creation;
+
+        assert.equal(cancellation.status, 200);
+        assert.equal(created.status, 409);
+        assert.equal((await Order.findById(orderId))!.status, "CANCELLED");
+        assert.equal(await Shipment.countDocuments({ orderId }), 0);
+        assert.equal((await Product.findById(product._id))!.stock, 10);
+      } finally {
+        resume();
+        mock.mock.restore();
+        await creation;
+      }
     });
   } finally {
     server.close();

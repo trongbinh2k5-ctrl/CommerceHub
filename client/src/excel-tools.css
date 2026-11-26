@@ -1,0 +1,17 @@
+.excel-tools { margin: 16px 0 24px; min-width: 0; }
+.excel-export-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.excel-export-row > label { display: flex; flex-direction: column; gap: 7px; margin: 0; min-width: 220px; }
+.excel-tools .excel-export-row > label > select { height: 48px; min-height: 48px; margin: 0; }
+.excel-tools .excel-export-row > .button { height: 48px; min-height: 48px; margin: 0; align-self: flex-end; }
+.excel-caption { margin: 10px 0 0; font-size: 14px; }
+.excel-create-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.dialog-inner .excel-create-actions .button { flex: 1; width: auto; margin: 0; }
+.excel-selected-file { overflow-wrap: anywhere; }
+.excel-preview { margin-top: 24px; }
+.excel-preview-table { max-height: 380px; margin: 16px 0; overflow: auto; }
+.excel-preview-table td { white-space: normal; overflow-wrap: anywhere; max-width: 420px; }
+.excel-preview-table th { position: sticky; top: 0; background: var(--surface, #fff); }
+.excel-preview .excel-preview-table table { min-width: 540px; }
+.admin-main .excel-preview .excel-preview-table th:first-child,
+.admin-main .excel-preview .excel-preview-table td:first-child { min-width: 56px; width: 56px; }
+@media (max-width: 600px) { .excel-export-row { align-items: stretch; flex-direction: column; } .excel-export-row label { min-width: 0; } .excel-export-row .button { width: 100%; } }

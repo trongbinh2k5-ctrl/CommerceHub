@@ -1,0 +1,37 @@
+dialog.excel-sheet-dialog { width: calc(100vw - 32px); max-width: 1600px; height: calc(100dvh - 32px); max-height: none; }
+dialog.excel-sheet-dialog .dialog-inner { height: 100%; display: flex; flex-direction: column; gap: 16px; padding: 24px; }
+dialog.excel-sheet-dialog .dialog-head { flex-shrink: 0; margin-bottom: 0; }
+dialog.excel-sheet-dialog .dialog-inner > p { margin: 0; }
+.sheet-toolbar,.sheet-footer { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; }
+.sheet-footer { justify-content: flex-end; }
+.sheet-toolbar span { color: var(--text-muted); font-size: 14px; }
+.sheet-grid-scroll { flex: 1; min-height: 180px; min-width: 0; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.sheet-grid { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; table-layout: fixed; }
+.sheet-grid th,.sheet-grid td { padding: 0; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); vertical-align: top; }
+.sheet-grid td { background: var(--surface); }
+.sheet-grid thead th { position: sticky; top: 0; z-index: 2; min-width: 200px; padding: 7px 10px; background: #edf3ff; color: var(--text); font-size: 14px; white-space: nowrap; text-align: left; }
+.sheet-letter { display: block; color: var(--text-muted); font-size: 12px; font-weight: 400; }
+.sheet-grid th.sheet-index { position: sticky; left: 0; z-index: 1; min-width: 48px; width: 48px; text-align: center; background: #edf3ff; padding: 8px; }
+.sheet-grid thead th.sheet-index { z-index: 3; }
+dialog.excel-sheet-dialog .sheet-grid textarea { display: block; width: 100%; min-width: 200px; height: 56px; min-height: 56px; margin: 0; padding: 7px 10px; border: 0; border-radius: 0; background: var(--surface); font: inherit; line-height: 1.45; resize: vertical; }
+dialog.excel-sheet-dialog .sheet-grid textarea.sheet-image-url { height: 36px; min-height: 36px; font-size: 13px; resize: vertical; }
+.sheet-grid textarea:focus { position: relative; outline: 2px solid var(--primary); outline-offset: -2px; box-shadow: none; }
+.sheet-grid td:last-child { padding: 8px; }
+dialog.excel-sheet-dialog .button { margin: 0; }
+dialog.excel-sheet-dialog .sheet-toolbar > .button,
+dialog.excel-sheet-dialog .sheet-footer > .button { width: auto; }
+.sheet-images { display: flex; flex-direction: column; gap: 6px; min-width: 230px; padding: 4px 8px 8px; }
+.sheet-image-actions { display: flex; align-items: center; gap: 8px; }
+dialog.excel-sheet-dialog .sheet-image-actions > .button { width: auto; min-height: 32px; height: 32px; padding: 5px 9px; font-size: 12px; }
+.sheet-images small { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+.sheet-image-hint { margin: 0; color: var(--text-muted); font-size: 13px; }
+.sheet-image-previews { display: flex; flex-wrap: nowrap; gap: 8px; max-width: 270px; padding: 4px; overflow-x: auto; }
+.sheet-image-preview { position: relative; flex: 0 0 48px; width: 48px; height: 48px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+.sheet-image-preview img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
+.sheet-image-preview > button { position: absolute; right: -5px; top: -5px; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 1px solid var(--border); border-radius: 50%; color: var(--text); background: var(--surface); font-size: 18px; line-height: 1; }
+@media (max-width: 600px) {
+  dialog.excel-sheet-dialog { width: 100vw; height: 100dvh; margin: 0; border-radius: 0; }
+  dialog.excel-sheet-dialog .dialog-inner { padding: 16px; gap: 12px; }
+  dialog.excel-sheet-dialog .dialog-head h2 { font-size: 21px; }
+  .sheet-footer .button { flex: 1; }
+}

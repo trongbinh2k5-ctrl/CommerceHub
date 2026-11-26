@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 type AccessTokenPayload = {
   userId: string;
   role: "CUSTOMER" | "STAFF" | "ADMIN";
+  authVersion?: number;
+  sessionId?: string;
 };
 
 export const generateAccessToken = (data: AccessTokenPayload): string => {
@@ -16,6 +18,8 @@ export const generateAccessToken = (data: AccessTokenPayload): string => {
     {
       sub: data.userId,
       role: data.role,
+      version: data.authVersion ?? 0,
+      ...(data.sessionId ? { sid: data.sessionId } : {}),
     },
     secret,
     {

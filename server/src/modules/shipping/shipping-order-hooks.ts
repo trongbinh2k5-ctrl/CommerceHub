@@ -1,6 +1,7 @@
 import { Types, type ClientSession } from "mongoose";
 
 import { Shipment } from "./shipping.model";
+import { GhnBooking } from './ghn.model';
 
 import { ShippingError } from "./shipping.service";
 
@@ -9,6 +10,7 @@ export async function cancelReadyShipmentForOrder(
   actorId: Types.ObjectId,
   session: ClientSession,
 ): Promise<void> {
+  if(await GhnBooking.exists({orderId,state:{$ne:'CANCELLED'}}).session(session))throw new ShippingError('Đơn đang có yêu cầu GHN; hủy tại GHN và đồng bộ trước khi hủy đơn hàng.',409);
   const shipment = await Shipment.findOne({
     orderId,
   }).session(session);
@@ -16,6 +18,7 @@ export async function cancelReadyShipmentForOrder(
   if (!shipment) {
     return;
   }
+  if(shipment.status==='CANCELLED')return;
 
   if (shipment.status !== "READY") {
     throw new ShippingError(

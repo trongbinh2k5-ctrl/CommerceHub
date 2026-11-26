@@ -10,6 +10,8 @@ export type ProductListQuery = {
   maxPrice?: number;
   sort?: ProductSort;
   categoryId?: string;
+  brand?: string;
+  inStock?: boolean;
 };
 
 export type AdminProductListQuery = ProductListQuery & {
@@ -43,6 +45,8 @@ export const parseProductQuery = (
     rawMaxPrice,
     rawSort,
     rawCategoryId,
+    query.brand,
+    query.inStock,
     ...(allowIsActive ? [rawIsActive] : []),
   ];
 
@@ -66,7 +70,7 @@ export const parseProductQuery = (
   }
 
   const categoryId =
-    typeof rawCategoryId === "string" ? rawCategoryId : undefined;
+    typeof rawCategoryId === "string" ? rawCategoryId.toLowerCase() : undefined;
 
   const search = typeof rawSearch === "string" ? rawSearch.trim() : undefined;
 
@@ -92,6 +96,7 @@ export const parseProductQuery = (
     !Number.isSafeInteger(limit) ||
     limit < 1 ||
     limit > 100 ||
+    !Number.isSafeInteger((page - 1) * limit) ||
     (minPrice !== undefined &&
       (!Number.isSafeInteger(minPrice) || minPrice < 0)) ||
     (maxPrice !== undefined &&
@@ -113,7 +118,10 @@ export const parseProductQuery = (
     maxPrice,
     sort,
     categoryId,
+    brand: typeof query.brand === 'string' ? query.brand.trim() : undefined,
+    inStock: query.inStock === undefined ? undefined : query.inStock === 'true',
   };
+  if ((data.brand && data.brand.length > 160) || (query.inStock !== undefined && !['true','false'].includes(String(query.inStock)))) return { success: false, message: 'Invalid product filters' };
 
   if (allowIsActive) {
     if (

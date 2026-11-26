@@ -35,7 +35,7 @@ export const getDashboardOverview = async () => {
     Payment.countDocuments({
       status: PaymentStatus.PAID,
     }),
-    Payment.aggregate<{ total: number }>([
+    Payment.aggregate<{ total: number;refunded:number }>([
       {
         $match: {
           status: PaymentStatus.PAID,
@@ -45,6 +45,7 @@ export const getDashboardOverview = async () => {
         $group: {
           _id: null,
           total: { $sum: "$amount" },
+          refunded:{$sum:{$cond:[{$eq:['$refundStatus','COMPLETED']},{$ifNull:['$refundAmount',0]},0]}},
         },
       },
     ]),
@@ -55,7 +56,9 @@ export const getDashboardOverview = async () => {
     totalCustomers,
     totalProducts,
     paidPayments,
-    totalRevenue: revenueResult[0]?.total ?? 0,
+    totalRevenue: (revenueResult[0]?.total ?? 0)-(revenueResult[0]?.refunded??0),
+    grossRevenue:revenueResult[0]?.total??0,
+    refundedAmount:revenueResult[0]?.refunded??0,
     currency: "VND",
   };
 };
@@ -86,7 +89,7 @@ export const getDashboardRevenue = async (filter: RevenueFilter) => {
             timezone: "UTC",
           },
         },
-        revenue: { $sum: "$amount" },
+        revenue: { $sum: {$subtract:['$amount',{$cond:[{$eq:['$refundStatus','COMPLETED']},{$ifNull:['$refundAmount',0]},0]}]} },
         paymentCount: { $sum: 1 },
       },
     },
@@ -153,6 +156,7 @@ export const getDashboardTopProducts = async (limit: number) => {
     {
       $match: {
         status: PaymentStatus.PAID,
+        refundStatus:{$ne:'COMPLETED'},
       },
     },
     {

@@ -3,8 +3,12 @@ import mongoose, { isValidObjectId, Types } from "mongoose";
 
 import { Cart } from "../cart/cart.model";
 import { Product } from "../products/product.model";
+import { getStoreSettings, shippingAmount } from '../store/store.model';
+import { Notification, StockMovement } from '../operations/operations.models';
+import { recordAudit } from '../operations/audit.service';
 import { Category } from "../categories/category.model";
 import { Address } from "../addresses/address.model";
+import {validateDeliveryAddress} from '../addresses/address-catalog';
 
 import {
   rejectManualShippingOrderStatus,
@@ -16,6 +20,11 @@ import { Payment, PaymentStatus } from "../payments/payment.model";
 import { Order, OrderStatus, PaymentMethod } from "./order.model";
 
 import { createCheckoutRequestHash } from "./checkout-idempotency";
+import { vnpayConfig } from '../payments/vnpay.config';
+import { sepayConfig } from '../payments/sepay.config';
+import {GhnBooking} from '../shipping/ghn.model';
+import {Shipment} from '../shipping/shipping.model';
+import {cancelGhn,cancelUncertainGhn} from '../shipping/ghn.service';
 
 export class OrderError extends Error {
   constructor(
@@ -123,9 +132,12 @@ export const createOrder = async (
   addressId: string,
   checkoutKey: string,
   couponInput?: unknown,
+  expectedTotal?: number,
+  paymentMethod: PaymentMethod = PaymentMethod.COD,
 ) => {
+  if (!Object.values(PaymentMethod).includes(paymentMethod)) throw new OrderError(400, 'Phương thức thanh toán không hợp lệ.');
   const couponCode = normalizeCouponCode(couponInput);
-  const requestHash = createCheckoutRequestHash(addressId, couponCode);
+  const requestHash = createCheckoutRequestHash(addressId, couponCode, paymentMethod);
 
   // Replays must work even after the cart has been cleared.
   const existing = await findExistingCheckout(userId, checkoutKey, requestHash);
@@ -137,6 +149,8 @@ export const createOrder = async (
     };
   }
 
+  if (paymentMethod === PaymentMethod.VNPAY && !vnpayConfig()) throw new OrderError(503, 'VNPAY sandbox chưa được cấu hình.');
+  if (paymentMethod === PaymentMethod.SEPAY && !sepayConfig()) throw new OrderError(503, 'SePay chưa được cấu hình.');
   const session = await mongoose.startSession();
 
   try {
@@ -168,6 +182,7 @@ export const createOrder = async (
       if (!address) {
         throw new OrderError(404, "Shipping address not found");
       }
+      Object.assign(address,validateDeliveryAddress(address));
 
       const cart = await Cart.findOne({
         userId,
@@ -186,6 +201,7 @@ export const createOrder = async (
         subtotal: number;
       }[] = [];
 
+      const orderId = new Types.ObjectId();
       let totalAmount = 0;
 
       for (const item of cart.items) {
@@ -242,6 +258,7 @@ export const createOrder = async (
           throw new OrderError(409, `Insufficient stock for ${product.name}`);
         }
 
+        await StockMovement.create([{productId:product._id,actorId:userId,delta:-quantity,before:updatedProduct.stock+quantity,after:updatedProduct.stock,reason:'Đặt hàng',orderId}],{session});
         const subtotal = product.price * quantity;
 
         if (!Number.isSafeInteger(subtotal)) {
@@ -264,10 +281,15 @@ export const createOrder = async (
         });
       }
 
-      const orderId = new Types.ObjectId();
       const subtotal = totalAmount;
       const coupon = couponCode ? await reserveCoupon(couponCode, subtotal, userId, orderId, session) : undefined;
       totalAmount -= coupon?.discountAmount ?? 0;
+      const shippingFee = shippingAmount(totalAmount, await getStoreSettings());
+      totalAmount += shippingFee;
+      if (paymentMethod === PaymentMethod.SEPAY && (!Number.isSafeInteger(totalAmount) || totalAmount < 1)) throw new OrderError(400, 'SePay yêu cầu tổng tiền nguyên dương hợp lệ.');
+      if (paymentMethod === PaymentMethod.VNPAY && (totalAmount < 5000 || !Number.isSafeInteger(totalAmount*100))) throw new OrderError(400, 'VNPAY yêu cầu tổng tiền tối thiểu 5.000đ và trong giới hạn hợp lệ.');
+      if (!Number.isSafeInteger(totalAmount)) throw new OrderError(400, 'Tổng tiền không hợp lệ.');
+      if (expectedTotal !== undefined && totalAmount !== expectedTotal) throw new OrderError(409, 'Giá hoặc phí giao hàng đã thay đổi. Vui lòng kiểm tra lại tổng tiền.');
 
       const createdOrders = await Order.create(
         [
@@ -288,7 +310,8 @@ export const createOrder = async (
             },
 
             totalAmount,
-            paymentMethod: PaymentMethod.COD,
+            shippingFee,
+            paymentMethod,
             status: OrderStatus.PENDING,
 
             checkoutKey,
@@ -303,6 +326,7 @@ export const createOrder = async (
       if (!createdOrder) {
         throw new OrderError(500, "Order creation failed");
       }
+      await Notification.create([{ userId, title: 'Đặt hàng thành công', message: paymentMethod===PaymentMethod.COD?'Đơn hàng đang chờ cửa hàng xác nhận.':'Đơn hàng đang chờ thanh toán. Hoàn tất thanh toán để cửa hàng tiếp nhận đơn.', href: `/orders/${createdOrder._id}`, dedupeKey: `order:${createdOrder._id}:PENDING` }], { session });
 
       // Payment and Order commit together.
       await Payment.create(
@@ -310,7 +334,7 @@ export const createOrder = async (
           {
             orderId: createdOrder._id,
             userId: createdOrder.userId,
-            method: PaymentMethod.COD,
+            method: paymentMethod,
             amount: totalAmount,
             status: PaymentStatus.PENDING,
           },
@@ -437,7 +461,9 @@ const cancelOrderByFilter = async (
         throw new OrderError(409, "Payment record missing for order");
       }
 
-      if (payment.status !== PaymentStatus.PENDING) {
+      if (payment.activeVnpayRef) throw new OrderError(409, 'Giao dịch VNPAY đang chờ xác nhận/đối soát; chưa thể hủy đơn.');
+      if (payment.activeSepayRef) throw new OrderError(409, 'Giao dịch SePay đang chờ xác nhận. Dừng thanh toán tại SePay và kiểm tra kết quả trước khi hủy đơn.');
+      if (![PaymentStatus.PENDING,PaymentStatus.PAID].includes(payment.status as PaymentStatus)) {
         throw new OrderError(
           409,
           "Payment is not pending. Cancellation requires a separate workflow",
@@ -486,10 +512,10 @@ const cancelOrderByFilter = async (
         {
           _id: payment._id,
           orderId: order._id,
-          status: PaymentStatus.PENDING,
+          status: payment.status,
         },
         {
-          $set: {
+          $set: payment.status===PaymentStatus.PAID?{refundStatus:'REQUESTED',refundRequestedAt:new Date()}:{
             status: PaymentStatus.CANCELLED,
             cancelledAt: new Date(),
           },
@@ -531,8 +557,11 @@ const cancelOrderByFilter = async (
         if (!updatedProduct) {
           throw new OrderError(409, "Unable to restore product stock");
         }
+        await StockMovement.create([{productId:item.productId,actorId,delta:item.quantity,before:updatedProduct.stock-item.quantity,after:updatedProduct.stock,reason:"Hủy đơn trước giao",orderId:order._id}],{session});
       }
 
+      await Notification.create([{userId:order.userId,title:"Đơn hàng đã hủy",message:payment.status===PaymentStatus.PAID?'Đơn đã hủy. Cửa hàng cần xử lý hoàn tiền riêng; tiền chưa được tự động hoàn.':'Đơn hàng đã ngừng xử lý. Bạn chưa thanh toán nên không có tiền cần hoàn.',href:`/orders/${order._id}`,dedupeKey:`order:${order._id}:CANCELLED`}],{session});
+      await recordAudit(actorId,'ORDER_UPDATED','ORDER',order._id,'Hủy đơn trước giao.',[{field:'status',before:order.status,after:'CANCELLED'}],session);
       return updatedOrder;
     });
 
@@ -548,14 +577,29 @@ const cancelOrderByFilter = async (
   }
 };
 
-// CUSTOMER: Cancel own PENDING order.
+// CUSTOMER: Cancel own order before carrier handover. Paid money remains PAID pending refund.
 export const cancelMyOrder = async (userId: string, orderId: string) => {
+  const owned=await Order.findOne({_id:orderId,userId});
+  if(!owned)throw new OrderError(404,'Không tìm thấy đơn hàng.');
+  if(![OrderStatus.PENDING,OrderStatus.CONFIRMED].includes(owned.status))throw new OrderError(409,'Đơn đã bàn giao vận chuyển hoặc kết thúc; không thể hủy.');
+  const booking=await GhnBooking.findOne({orderId,state:{$ne:'CANCELLED'}});
+  if(booking){
+    const payment=await Payment.findOne({orderId,userId});
+    if(!payment||payment.activeSepayRef||payment.activeVnpayRef)throw new OrderError(409,'Cần đối soát thanh toán trước khi hủy vận đơn.');
+    const shipment=await Shipment.findOne({orderId});
+    if(!shipment&&['PENDING','UNCERTAIN','CANCEL_CHECK'].includes(booking.state))await cancelUncertainGhn(orderId,userId);
+    else{
+      if(booking.state!=='CREATED'||shipment?.status!=='READY')throw new OrderError(409,'Yêu cầu GHN cần được cửa hàng đối soát trước khi hủy.');
+      const result=await cancelGhn(orderId,userId);
+      if(result?.status!=='CANCELLED')throw new OrderError(409,'GHN chưa xác nhận hủy vận đơn. Đơn hàng chưa được hủy.');
+    }
+  }
   return cancelOrderByFilter(
     {
       _id: orderId,
       userId,
     },
-    [OrderStatus.PENDING],
+    [OrderStatus.PENDING,OrderStatus.CONFIRMED],
     userId,
   );
 };
@@ -615,6 +659,9 @@ export const updateOrderStatus = async (
     throw new OrderError(409, "Invalid order status transition");
   }
 
+  const session = await mongoose.startSession();
+  try { return await session.withTransaction(async () => {
+  if (order.paymentMethod !== PaymentMethod.COD && !await Payment.exists({orderId:order._id,method:order.paymentMethod,status:PaymentStatus.PAID,amount:order.totalAmount,userId:order.userId}).session(session)) throw new OrderError(409, 'Đơn thanh toán online phải được trả tiền trước khi xác nhận.');
   const updated = await Order.findOneAndUpdate(
     {
       _id: orderId,
@@ -628,12 +675,15 @@ export const updateOrderStatus = async (
     {
       new: true,
       runValidators: true,
+      session,
     },
   );
 
   if (!updated) {
     throw new OrderError(409, "Order status changed concurrently");
   }
-
+  await Notification.create([{userId:updated.userId,title:'Đơn hàng đã xác nhận',message:'Cửa hàng đang chuẩn bị đơn hàng của bạn.',href:`/orders/${updated._id}`,dedupeKey:`order:${updated._id}:CONFIRMED`}],{session});
+  await recordAudit(actorId,'ORDER_UPDATED','ORDER',updated._id,'Xác nhận đơn hàng.',[{field:'status',before:order.status,after:updated.status}],session);
   return updated;
+  }); } finally { await session.endSession(); }
 };

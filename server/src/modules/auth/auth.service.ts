@@ -64,5 +64,6 @@ export const loginUser = async (data: LoginData) => {
     fullName: user.fullName,
     email: user.email,
     role: user.role,
+    authVersion: user.authVersion || 0,
   };
 };

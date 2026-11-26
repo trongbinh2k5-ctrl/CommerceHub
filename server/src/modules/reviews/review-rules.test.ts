@@ -69,6 +69,19 @@ test("Reject decimal rating", () => {
   );
 });
 
+test("Validate the optional editor version", () => {
+  const review = {
+    rating: 4,
+    title: "Good product",
+    comment: "The quality is quite good.",
+  };
+
+  assert.equal(validateReviewInput({ ...review, version: 0 }).version, 0);
+  for (const version of [-1, 0.5, "0", null, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => validateReviewInput({ ...review, version }), ReviewError);
+  }
+});
+
 test("Reject empty comment", () => {
   assert.throws(
     () =>

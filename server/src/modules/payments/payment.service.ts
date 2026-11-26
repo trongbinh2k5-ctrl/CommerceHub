@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { Order, OrderStatus, PaymentMethod } from "../orders/order.model";
 
 import { Payment, PaymentStatus } from "./payment.model";
+import { Notification } from '../operations/operations.models';
+import { recordAudit } from '../operations/audit.service';
 
 export class PaymentError extends Error {
   constructor(
@@ -160,6 +162,8 @@ export const confirmCodPayment = async (
         throw new PaymentError(409, "Payment status changed concurrently");
       }
 
+      await Notification.create([{userId:order.userId,title:'Đã xác nhận thu tiền COD',message:'Cửa hàng đã xác nhận thanh toán cho đơn hàng của bạn.',href:`/orders/${order._id}`,dedupeKey:`payment:${payment.id}:PAID`}],{session});
+      await recordAudit(confirmedBy,'PAYMENT_CONFIRMED','PAYMENT',payment._id,'Xác nhận đã thu tiền COD.',[{field:'status',before:'PENDING',after:'PAID'},{field:'amount',before:payment.amount,after:updated.amount}],session);
       return updated;
     });
 

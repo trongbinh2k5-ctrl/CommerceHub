@@ -1,0 +1,23 @@
+.wordmark.berylcore-logo {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 9px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.berylcore-logo .berylcore-symbol { display: block; width: 36px; height: 36px; flex: 0 0 auto; }
+.berylcore-logo .wordmark-name { color: var(--text); }
+.berylcore-logo .brand-core { color: var(--primary); }
+.footer-top .wordmark.berylcore-logo { font-size: 23px; }
+@media (max-width: 760px) {
+  .header-main > .wordmark.berylcore-logo { gap: 7px; font-size: 20px; letter-spacing: -.8px; }
+  .header-main .berylcore-symbol { width: 30px; height: 30px; }
+}
+@media (max-width: 380px) {
+  .header-main:has(.cart-link) > .wordmark.berylcore-logo { gap: 5px; font-size: 16px; letter-spacing: -.6px; }
+  .header-main .berylcore-symbol { width: 26px; height: 26px; }
+}

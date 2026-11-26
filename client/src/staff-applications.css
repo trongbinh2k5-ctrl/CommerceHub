@@ -1,0 +1,10 @@
+.staff-applications { margin-top: 28px; min-width: 0; }
+.staff-applications > h3 { margin-top: 28px; }
+.staff-applications > label { max-width: 280px; margin-bottom: 20px; }
+.staff-application-card { overflow-wrap: anywhere; }
+.application-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+.application-actions { margin: -8px 0 24px; flex-wrap: wrap; }
+.application-actions .button { white-space: normal; text-align: center; }
+@media (max-width: 600px) {
+  .application-actions { flex-direction: column; align-items: stretch; }
+}

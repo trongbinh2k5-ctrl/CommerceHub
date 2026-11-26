@@ -11,7 +11,7 @@ import {
 } from "./cart.service";
 
 type OperationResult = {
-  status: "SUCCESS" | "NOT_FOUND" | "UNAVAILABLE" | "LIMIT_EXCEEDED";
+  status: "SUCCESS" | "NOT_FOUND" | "UNAVAILABLE" | "INSUFFICIENT_STOCK" | "LIMIT_EXCEEDED";
 };
 
 const handleResult = (
@@ -38,6 +38,13 @@ const handleResult = (
       res.status(400).json({
         success: false,
         message: "Maximum quantity is 99",
+      });
+      return;
+
+    case "INSUFFICIENT_STOCK":
+      res.status(409).json({
+        success: false,
+        message: "Insufficient stock",
       });
       return;
 

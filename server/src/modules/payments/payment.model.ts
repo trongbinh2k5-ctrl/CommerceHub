@@ -47,6 +47,18 @@ const paymentSchema = new Schema(
       type: Date,
       default: null,
     },
+    activeVnpayRef: { type: String, default: null },
+    refundStatus: {type:String,enum:['REQUESTED','PROCESSING','COMPLETED'],default:null},
+    refundRequestedAt: {type:Date,default:null},
+    refundProcessingAt: {type:Date,default:null},
+    refundRecipientSubmittedAt: {type:Date,default:null},
+    refundRecipient: {type:new Schema({bankName:{type:String,required:true,maxlength:80},accountNumber:{type:String,required:true,maxlength:30},accountHolder:{type:String,required:true,maxlength:100}},{_id:false}),select:false,default:null},
+    refundedAt: {type:Date,default:null},
+    refundAmount: {type:Number,min:0,default:0},
+    refundReference: {type:String,maxlength:120},
+    refundConfirmedBy: {type:Schema.Types.ObjectId,ref:'User',default:null},
+    activeSepayRef: { type: String, default: null },
+    gatewayTransactionNo: { type: String, default: null },
     cancelledAt: {
       type: Date,
       default: null,
@@ -61,6 +73,7 @@ const paymentSchema = new Schema(
 );
 
 paymentSchema.index({ orderId: 1 }, { unique: true });
+paymentSchema.index({refundReference:1},{unique:true,partialFilterExpression:{refundReference:{$type:'string'}}});
 
 paymentSchema.index({
   userId: 1,

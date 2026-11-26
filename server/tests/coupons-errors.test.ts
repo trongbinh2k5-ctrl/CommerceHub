@@ -25,7 +25,7 @@ test("Test 5 - Coupon error scenarios", { timeout: 300000 }, async t => {
     fullName: `Coupon ${i}`, email: `coupon${i}@test.local`, passwordHash: "unused", role,
   })));
   const tokens = users.map(u => jwt.sign({ role: u.role }, process.env.JWT_ACCESS_SECRET!, { subject: u.id }));
-  const addresses = await Address.create(users.map(u => ({ userId: u._id, fullName: "Test", phone: "0901234567", province: "HCM", ward: "Ward", detail: "1 Street" })));
+  const addresses = await Address.create(users.map(u => ({ userId: u._id, fullName: "Test", phone: "0901234567", province: 'Hồ Chí Minh', ward: 'Phường Sài Gòn', detail: "1 Street" })));
   const product = await Product.create({ name: "Coupon product", sku: "COUPON-TEST", price: 100000, stock: 100 });
   let seq = 0;
   const api = async (path: string, user = 0, method = "GET", body?: unknown, key?: string) => {

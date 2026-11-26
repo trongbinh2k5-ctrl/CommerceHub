@@ -1,5 +1,10 @@
 import { Product } from "./product.model";
 import { Category } from "../categories/category.model";
+import mongoose from 'mongoose';
+import { StockMovement } from '../operations/operations.models';
+import type { ProductDetails } from './product-details';
+import { auditChanges, recordAudit } from '../operations/audit.service';
+const productAuditFields=['name','sku','price','stock','isActive','categoryId','brand','modelName','condition','origin','variantGroup','variantLabel'] as const;
 type ProductQuery = {
   search?: string;
   page: number;
@@ -7,6 +12,8 @@ type ProductQuery = {
   minPrice?: number;
   maxPrice?: number;
   categoryId?: string;
+  brand?: string;
+  inStock?: boolean;
   sort?: "price_asc" | "price_desc";
 };
 
@@ -25,6 +32,8 @@ const queryProducts = async ({
   isActive,
   categoryId,
   activeCategoryIds,
+  brand,
+  inStock,
 }: AdminProductQuery) => {
   const filter: {
     isActive?: boolean;
@@ -32,11 +41,15 @@ const queryProducts = async ({
     $or?: Array<{ categoryId: null } | { categoryId: { $in: string[] } }>;
     name?: { $regex: string; $options: string };
     price?: { $gte?: number; $lte?: number };
+    brand?: string;
+    stock?: { $gt: number } | number;
   } = {};
 
   if (isActive !== undefined) {
     filter.isActive = isActive;
   }
+  if (brand) filter.brand = brand;
+  if (inStock !== undefined) filter.stock = inStock ? { $gt: 0 } : 0;
 
   if (activeCategoryIds !== undefined) {
     if (categoryId !== undefined) {
@@ -74,15 +87,12 @@ const queryProducts = async ({
     }
   }
 
-  const sortOption: { price?: 1 | -1; _id: -1 } = {
-    _id: -1,
-  };
-
-  if (sort === "price_asc") {
-    sortOption.price = 1;
-  } else if (sort === "price_desc") {
-    sortOption.price = -1;
-  }
+  // MongoDB uses field order as sort precedence; _id is only a tie-breaker.
+  const sortOption: Record<string, 1 | -1> = sort === "price_asc"
+    ? { price: 1, _id: -1 }
+    : sort === "price_desc"
+      ? { price: -1, _id: -1 }
+      : { createdAt: -1, _id: -1 };
 
   const skip = (page - 1) * limit;
 
@@ -125,14 +135,15 @@ export const getAdminProducts = async (query: AdminProductQuery) => {
   return queryProducts(query);
 };
 
-export const createProduct = async (data: {
+export const createProduct = async (data: ProductDetails & {
   name: string;
   sku: string;
   price: number;
   description?: string;
   categoryId?: string;
   stock?: number;
-}) => {
+  imageUrl?: string;
+}, actorId?:string) => {
   if (data.categoryId !== undefined) {
     const category = await Category.findOne({
       _id: data.categoryId,
@@ -144,22 +155,27 @@ export const createProduct = async (data: {
     }
   }
 
-  const product = await Product.create(data);
-
-  return product;
+  const session=await mongoose.startSession();
+  try { return await session.withTransaction(async()=>{
+    const [product]=await Product.create([data],{session});
+    await recordAudit(actorId,'PRODUCT_CREATED','PRODUCT',product!._id,'Tạo sản phẩm.',auditChanges(null,product,productAuditFields),session);
+    return product!;
+  }); } finally { await session.endSession(); }
 };
 
 export const updateProduct = async (
   id: string,
-  data: {
+  data: ProductDetails & {
     name?: string;
     sku?: string;
     price?: number;
     description?: string;
-    categoryId?: string;
+    categoryId?: string | null;
+    imageUrl?: string;
   },
+  actorId?:string,
 ) => {
-  if (data.categoryId !== undefined) {
+  if (data.categoryId !== undefined && data.categoryId !== null) {
     const category = await Category.findOne({
       _id: data.categoryId,
       isActive: true,
@@ -170,22 +186,30 @@ export const updateProduct = async (
     }
   }
 
+  const session=await mongoose.startSession();
+  try { return await session.withTransaction(async()=>{
+  const before=await Product.findById(id).session(session);
   const product = await Product.findByIdAndUpdate(
     id,
     { $set: data },
     {
       new: true,
       runValidators: true,
+      session,
     },
   );
 
+  if(product)await recordAudit(actorId,'PRODUCT_UPDATED','PRODUCT',product._id,'Cập nhật sản phẩm.',auditChanges(before,product,productAuditFields),session);
   return {
     status: "SUCCESS" as const,
     product,
   };
+  }); } finally { await session.endSession(); }
 };
 
-export const softDeleteProduct = async (id: string) => {
+export const softDeleteProduct = async (id: string, actorId?:string) => {
+  const session=await mongoose.startSession();
+  try { return await session.withTransaction(async()=>{
   const product = await Product.findOneAndUpdate(
     {
       _id: id,
@@ -196,13 +220,18 @@ export const softDeleteProduct = async (id: string) => {
     },
     {
       new: true,
+      session,
     },
   );
 
+  if(product)await recordAudit(actorId,'PRODUCT_UPDATED','PRODUCT',product._id,'Ẩn sản phẩm.',[{field:'isActive',before:true,after:false}],session);
   return product;
+  }); } finally { await session.endSession(); }
 };
 
-export const restoreProduct = async (id: string) => {
+export const restoreProduct = async (id: string, actorId?:string) => {
+  const session=await mongoose.startSession();
+  try { return await session.withTransaction(async()=>{
   const product = await Product.findOneAndUpdate(
     {
       _id: id,
@@ -214,62 +243,42 @@ export const restoreProduct = async (id: string) => {
     {
       new: true,
       runValidators: true,
+      session,
     },
   );
 
+  if(product)await recordAudit(actorId,'PRODUCT_UPDATED','PRODUCT',product._id,'Khôi phục sản phẩm.',[{field:'isActive',before:false,after:true}],session);
   return product;
+  }); } finally { await session.endSession(); }
 };
 
 export const getProductById = async (id: string) => {
   const product = await Product.findOne({
     _id: id,
     isActive: true,
-  }).populate<{
-    categoryId: {
-      _id: string;
-      name: string;
-      slug: string;
-      isActive: boolean;
-    } | null;
-  }>("categoryId", "name slug isActive");
+  });
 
   if (!product) {
     return null;
   }
 
-  // Nếu sản phẩm thuộc danh mục đã bị ẩn thì không hiển thị công khai
-  if (product.categoryId && !product.categoryId.isActive) {
+  // A missing or hidden category must have the same visibility as in the listing.
+  if (product.categoryId && !await Category.exists({ _id: product.categoryId, isActive: true })) {
     return null;
   }
 
-  return product;
+  return product.populate("categoryId", "name slug isActive");
 };
-export const adjustProductStock = async (id: string, delta: number) => {
-  const filter =
-    delta < 0
-      ? {
-          _id: id,
-          stock: { $gte: -delta },
-        }
-      : {
-          _id: id,
-          stock: {
-            $lte: Number.MAX_SAFE_INTEGER - delta,
-          },
-        };
-
-  const product = await Product.findOneAndUpdate(
-    filter,
-    {
-      $inc: {
-        stock: delta,
-      },
-    },
-    {
-      new: true,
-      runValidators: true,
-    },
-  );
-
-  return product;
+export const adjustProductStock = async (id: string, delta: number, actorId?: string, reason = 'Chưa ghi lý do') => {
+  const session = await mongoose.startSession();
+  try {
+    return await session.withTransaction(async () => {
+      const filter = delta < 0 ? {_id:id,stock:{$gte:-delta}} : {_id:id,stock:{$lte:Number.MAX_SAFE_INTEGER-delta}};
+      const product = await Product.findOneAndUpdate(filter,{$inc:{stock:delta}},{returnDocument:'after',runValidators:true,session});
+      if(!product) return null;
+      await StockMovement.create([{productId:product._id,actorId,delta,before:product.stock-delta,after:product.stock,reason}],{session});
+      await recordAudit(actorId,'STOCK_ADJUSTED','PRODUCT',product._id,reason,[{field:'stock',before:product.stock-delta,after:product.stock}],session);
+      return product;
+    });
+  } finally { await session.endSession(); }
 };

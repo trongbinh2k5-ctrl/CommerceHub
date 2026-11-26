@@ -1,0 +1,731 @@
+{
+  "checked": "2026-11-07",
+  "categories": [
+    {
+      "slug": "laptop-gaming",
+      "name": "Laptop gaming",
+      "description": "Khám phá laptop gaming ASUS. Xác nhận cấu hình CPU, GPU, RAM và màn hình theo mã máy cụ thể trước khi mua."
+    },
+    {
+      "slug": "laptop-van-phong",
+      "name": "Laptop học tập & làm việc",
+      "description": "MacBook Air và laptop cho công việc, học tập. So sánh màn hình, bộ nhớ và dung lượng lưu trữ theo từng phiên bản."
+    },
+    {
+      "slug": "man-hinh",
+      "name": "Màn hình",
+      "description": "Màn hình Samsung Odyssey cho góc chơi game và làm việc. Tìm hiểu độ phân giải, tấm nền và tần số quét."
+    },
+    {
+      "slug": "ban-phim",
+      "name": "Bàn phím",
+      "description": "Bàn phím Logitech MX cho bàn làm việc: lựa chọn bố cục đầy đủ hoặc nhỏ gọn với đèn nền."
+    },
+    {
+      "slug": "chuot",
+      "name": "Chuột",
+      "description": "Chuột Logitech cho công việc và gaming. Khám phá cảm biến, kiểu kết nối và các tính năng điều khiển."
+    },
+    {
+      "slug": "tai-nghe",
+      "name": "Tai nghe",
+      "description": "Tai nghe Sony chụp tai và không dây nhỏ gọn. Xem khả năng chống ồn, kết nối và thời lượng pin theo điều kiện của hãng."
+    },
+    {
+      "slug": "luu-tru",
+      "name": "SSD & lưu trữ",
+      "description": "SSD Samsung gắn trong và di động. Kiểm tra dung lượng, giao tiếp và tính tương thích với thiết bị của bạn."
+    },
+    {
+      "slug": "linh-kien",
+      "name": "Linh kiện PC",
+      "description": "Bộ xử lý và linh kiện cho máy tính để bàn. Kiểm tra nền tảng, bo mạch chủ, nguồn và tản nhiệt trước khi nâng cấp."
+    }
+  ],
+  "products": [
+    {
+      "name": "Apple MacBook Air 13 inch M5 · 16GB / 512GB",
+      "sku": "CH-APPLE-MBA-M5-13-16-512",
+      "brand": "Apple",
+      "modelName": "MacBook Air 13 inch (M5, 2026)",
+      "categorySlug": "laptop-van-phong",
+      "description": "Laptop gọn cho học tập và làm việc, dùng chip M5 và bộ nhớ thống nhất. Phiên bản giới thiệu có CPU 10 lõi, GPU 8 lõi, RAM 16GB và SSD 512GB.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/macbook-air-m5-13-1.jpg",
+      "gallery": [
+        "/images/catalog-2026-11/macbook-air-m5-13-2.jpg"
+      ],
+      "specifications": [
+        {
+          "label": "Chip",
+          "value": "Apple M5 · CPU 10 lõi · GPU 8 lõi"
+        },
+        {
+          "label": "Bộ nhớ",
+          "value": "16GB thống nhất"
+        },
+        {
+          "label": "Lưu trữ",
+          "value": "SSD 512GB"
+        },
+        {
+          "label": "Màn hình",
+          "value": "Liquid Retina 13,6 inch · 2560 × 1664"
+        },
+        {
+          "label": "Độ sáng",
+          "value": "500 nit"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.apple.com/vn/macbook-air/specs/"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://www.apple.com/v/macbook-air/specs/c/images/specs/13-inch/mba_13_hero__c067qisf51oy_large_2x.jpg",
+          "local": "/images/catalog-2026-11/macbook-air-m5-13-1.jpg",
+          "bytes": 47391
+        },
+        {
+          "url": "https://www.apple.com/v/macbook-air/specs/c/images/specs/13-inch/mba_13_specs_hero__gcrzfzta9pyu_large_2x.jpg",
+          "local": "/images/catalog-2026-11/macbook-air-m5-13-2.jpg",
+          "bytes": 18276
+        }
+      ],
+      "variantGroup": "apple-macbook-air-m5",
+      "variantLabel": "13 inch · 16GB / 512GB"
+    },
+    {
+      "name": "Apple MacBook Air 15 inch M5 · 16GB / 512GB",
+      "sku": "CH-APPLE-MBA-M5-15-16-512",
+      "brand": "Apple",
+      "modelName": "MacBook Air 15 inch (M5, 2026)",
+      "categorySlug": "laptop-van-phong",
+      "description": "Phiên bản màn hình lớn của MacBook Air M5 cho không gian làm việc rộng hơn. Cấu hình giới thiệu gồm CPU 10 lõi, GPU 10 lõi, bộ nhớ thống nhất 16GB và SSD 512GB.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/macbook-air-m5-15-1.jpg",
+      "gallery": [
+        "/images/catalog-2026-11/macbook-air-m5-15-2.jpg"
+      ],
+      "specifications": [
+        {
+          "label": "Chip",
+          "value": "Apple M5 · CPU 10 lõi · GPU 10 lõi"
+        },
+        {
+          "label": "Bộ nhớ",
+          "value": "16GB thống nhất"
+        },
+        {
+          "label": "Lưu trữ",
+          "value": "SSD 512GB"
+        },
+        {
+          "label": "Màn hình",
+          "value": "Liquid Retina 15,3 inch · 2880 × 1864"
+        },
+        {
+          "label": "Độ sáng",
+          "value": "500 nit"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.apple.com/vn/macbook-air/specs/"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://www.apple.com/v/macbook-air/specs/c/images/specs/15-inch/mba_15_hero__gkshp5bw2f6m_large_2x.jpg",
+          "local": "/images/catalog-2026-11/macbook-air-m5-15-1.jpg",
+          "bytes": 53279
+        },
+        {
+          "url": "https://www.apple.com/v/macbook-air/specs/c/images/specs/15-inch/mba_15_display__oz47vz6kmuai_large_2x.jpg",
+          "local": "/images/catalog-2026-11/macbook-air-m5-15-2.jpg",
+          "bytes": 215184
+        }
+      ],
+      "variantGroup": "apple-macbook-air-m5",
+      "variantLabel": "15 inch · 16GB / 512GB"
+    },
+    {
+      "name": "Samsung Odyssey G5 G55C 27 inch QHD 165Hz",
+      "sku": "CH-SAM-LS27CG552EEXXV",
+      "brand": "Samsung",
+      "modelName": "LS27CG552EEXXV",
+      "categorySlug": "man-hinh",
+      "description": "Màn hình cong 27 inch thuộc dòng Odyssey G5. Độ phân giải QHD và tần số quét 165Hz phục vụ góc chơi game, với kiểu dáng cong bao quanh tầm nhìn.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/samsung-g55c-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/samsung-g55c-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Kích thước",
+          "value": "27 inch"
+        },
+        {
+          "label": "Độ phân giải",
+          "value": "QHD · 2560 × 1440"
+        },
+        {
+          "label": "Tần số quét",
+          "value": "Tối đa 165Hz"
+        },
+        {
+          "label": "Thiết kế",
+          "value": "Màn hình cong"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.samsung.com/vn/monitors/gaming/odyssey-g5-g55c-27-inch-165hz-curved-qhd-ls27cg552eexxv/"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/ls27cg552eexxv/gallery/vn-odyssey-g5-g55c-ls27cg552eexxv-538902440?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-g55c-1.png",
+          "bytes": 951861
+        },
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/ls27cg552eexxv/gallery/vn-odyssey-g5-g55c-ls27cg552eexxv-538902418?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-g55c-2.png",
+          "bytes": 701869
+        }
+      ]
+    },
+    {
+      "name": "Samsung Odyssey G5 G50D 27 inch QHD 180Hz",
+      "sku": "CH-SAM-LS27DG502EEXXV",
+      "brand": "Samsung",
+      "modelName": "LS27DG502EEXXV",
+      "categorySlug": "man-hinh",
+      "description": "Màn hình phẳng Odyssey G5 với tấm nền IPS, độ phân giải QHD và tần số quét 180Hz. Phù hợp khi bạn tìm màn hình gaming 27 inch có góc nhìn rộng.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/samsung-g50d-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/samsung-g50d-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Kích thước",
+          "value": "27 inch"
+        },
+        {
+          "label": "Độ phân giải",
+          "value": "QHD · 2560 × 1440"
+        },
+        {
+          "label": "Tấm nền",
+          "value": "IPS"
+        },
+        {
+          "label": "Tần số quét",
+          "value": "Tối đa 180Hz"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.samsung.com/vn/monitors/gaming/odyssey-g5-g50d-27-inch-180hz-ips-qhd-ls27dg502eexxv/"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/ls27dg502eexxv/gallery/vn-odyssey-g5-g50d-ls27dg502eexxv-540378928?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-g50d-1.png",
+          "bytes": 1036068
+        },
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/ls27dg502eexxv/gallery/vn-odyssey-g5-g50d-ls27dg502eexxv-540378887?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-g50d-2.png",
+          "bytes": 1041718
+        }
+      ]
+    },
+    {
+      "name": "Logitech MX Keys S · Graphite",
+      "sku": "CH-LOG-920-011563",
+      "brand": "Logitech",
+      "modelName": "MX Keys S · 920-011563",
+      "categorySlug": "ban-phim",
+      "description": "Bàn phím không dây kích thước đầy đủ với đèn nền tự điều chỉnh. Có các thao tác tùy chỉnh qua Logi Options+ cho những công việc lặp lại trên máy tính.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/mx-keys-s-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/mx-keys-s-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Kiểu bàn phím",
+          "value": "Không dây · bố cục đầy đủ"
+        },
+        {
+          "label": "Đèn nền",
+          "value": "Có, tự điều chỉnh"
+        },
+        {
+          "label": "Màu giới thiệu",
+          "value": "Graphite"
+        },
+        {
+          "label": "Phần mềm",
+          "value": "Logi Options+"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.logitech.com/vi-vn/shop/p/mx-keys-s.920-011563"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-keys-s/migration-assets-for-delorean-2025/gallery/mx-keys-s-top-view-graphite-us.png",
+          "local": "/images/catalog-2026-11/mx-keys-s-1.png",
+          "bytes": 837791
+        },
+        {
+          "url": "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-keys-s/migration-assets-for-delorean-2025/gallery/mx-keys-s-fob-view-graphite-us.png",
+          "local": "/images/catalog-2026-11/mx-keys-s-2.png",
+          "bytes": 579006
+        }
+      ]
+    },
+    {
+      "name": "Logitech MX Keys Mini · Graphite",
+      "sku": "CH-LOG-920-010505",
+      "brand": "Logitech",
+      "modelName": "MX Keys Mini · 920-010505",
+      "categorySlug": "ban-phim",
+      "description": "Bàn phím không dây có đèn nền với bố cục tối giản, giúp dành thêm diện tích cho chuột và các vật dụng trên bàn. Bản giới thiệu sử dụng màu Graphite.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/mx-keys-mini-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/mx-keys-mini-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Kiểu bàn phím",
+          "value": "Không dây · bố cục nhỏ gọn"
+        },
+        {
+          "label": "Đèn nền",
+          "value": "Có"
+        },
+        {
+          "label": "Màu giới thiệu",
+          "value": "Graphite"
+        },
+        {
+          "label": "Dòng sản phẩm",
+          "value": "MX Keys Mini"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.logitech.com/vi-vn/shop/p/mx-keys-mini.920-010505"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-keys-mini/gallery/us/mx-keys-mini-top-graphite-us.png",
+          "local": "/images/catalog-2026-11/mx-keys-mini-1.png",
+          "bytes": 314794
+        },
+        {
+          "url": "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/keyboards/mx-keys-mini/gallery/us/mx-keys-mini-front-graphite-us.png",
+          "local": "/images/catalog-2026-11/mx-keys-mini-2.png",
+          "bytes": 234643
+        }
+      ]
+    },
+    {
+      "name": "Logitech MX Master 3S · Graphite",
+      "sku": "CH-LOG-MX-MASTER-3S-GRAPHITE",
+      "brand": "Logitech",
+      "modelName": "MX Master 3S",
+      "categorySlug": "chuot",
+      "description": "Chuột không dây dòng MX dành cho công việc, với cảm biến 8K và cuộn MagSpeed. Thiết kế có vùng đỡ ngón cái cùng các thao tác có thể tùy chỉnh.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/mx-master-3s-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/mx-master-3s-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Cảm biến",
+          "value": "Độ phân giải tối đa 8.000 DPI"
+        },
+        {
+          "label": "Cuộn",
+          "value": "MagSpeed"
+        },
+        {
+          "label": "Kiểu kết nối",
+          "value": "Không dây"
+        },
+        {
+          "label": "Màu giới thiệu",
+          "value": "Graphite"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.logitech.com/vi-vn/shop/p/mx-master-3s"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-3s/migration-assets-for-delorean-2025/gallery/mx-master-3s-top-view-graphite.png",
+          "local": "/images/catalog-2026-11/mx-master-3s-1.png",
+          "bytes": 467039
+        },
+        {
+          "url": "https://resource.logitech.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/logitech/en/products/mice/mx-master-3s/migration-assets-for-delorean-2025/gallery/mx-master-3s-left-profile-view-graphite.png",
+          "local": "/images/catalog-2026-11/mx-master-3s-2.png",
+          "bytes": 380273
+        }
+      ]
+    },
+    {
+      "name": "Logitech G502 HERO · Đen",
+      "sku": "CH-LOG-G502-HERO-BLACK",
+      "brand": "Logitech",
+      "modelName": "G502 HERO",
+      "categorySlug": "chuot",
+      "description": "Chuột gaming có dây với cảm biến HERO, đèn RGB và bộ tạ điều chỉnh trọng lượng. Có thể tùy chỉnh cấu hình qua phần mềm G HUB.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/g502-hero-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/g502-hero-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Cảm biến",
+          "value": "HERO · tối đa 25.600 DPI"
+        },
+        {
+          "label": "Kiểu kết nối",
+          "value": "Có dây USB"
+        },
+        {
+          "label": "Đèn",
+          "value": "RGB LIGHTSYNC"
+        },
+        {
+          "label": "Phần mềm",
+          "value": "Logitech G HUB"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.logitechg.com/vi-vn/shop/p/g502-hero-gaming-mouse"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://resource.logitechg.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/gaming/en/non-braid/hyjal-g502-hero/2025/g502-hero-mouse-top-angle-gallery-1.png",
+          "local": "/images/catalog-2026-11/g502-hero-1.png",
+          "bytes": 578550
+        },
+        {
+          "url": "https://resource.logitechg.com/c_fill,q_auto,f_auto,dpr_1.0/d_transparent.gif/content/dam/gaming/en/non-braid/hyjal-g502-hero/2025/g502-hero-mouse-profile-left-angle-gallery-2.png",
+          "local": "/images/catalog-2026-11/g502-hero-2.png",
+          "bytes": 351533
+        }
+      ]
+    },
+    {
+      "name": "Sony WH-1000XM5 · Đen",
+      "sku": "CH-SONY-WH1000XM5-B",
+      "brand": "Sony",
+      "modelName": "WH-1000XM5",
+      "categorySlug": "tai-nghe",
+      "description": "Tai nghe chụp tai không dây có chống ồn chủ động và chế độ âm thanh xung quanh. Theo điều kiện thử nghiệm của Sony, thời gian phát nhạc đạt tối đa 30 giờ khi bật chống ồn.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/sony-wh1000xm5-1.png",
+      "gallery": [],
+      "specifications": [
+        {
+          "label": "Kiểu đeo",
+          "value": "Chụp tai · over-ear"
+        },
+        {
+          "label": "Bluetooth",
+          "value": "5.2"
+        },
+        {
+          "label": "Thời lượng phát nhạc",
+          "value": "Tối đa 30 giờ bật chống ồn; 40 giờ tắt chống ồn"
+        },
+        {
+          "label": "Codec Bluetooth",
+          "value": "SBC, AAC, LDAC"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.sony.com.vn/electronics/tai-nghe-choang-dau-tai-nghe/wh-1000xm5/specifications"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://www.sony.com.vn/image/6145c1d32e6ac8e63a46c912dc33c5bb?fmt=png-alpha&wid=1200",
+          "local": "/images/catalog-2026-11/sony-wh1000xm5-1.png",
+          "bytes": 465137
+        }
+      ]
+    },
+    {
+      "name": "Sony WF-C710N · Xanh trong suốt",
+      "sku": "CH-SONY-WFC710N-GLASS-BLUE",
+      "brand": "Sony",
+      "modelName": "WF-C710N",
+      "categorySlug": "tai-nghe",
+      "description": "Tai nghe không dây nhỏ gọn có chống ồn và kết nối đa điểm. Màng loa 5mm, công nghệ DSEE cùng thiết kế kháng nước IPX4 hỗ trợ sử dụng hằng ngày.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/sony-wfc710n-1.png",
+      "gallery": [],
+      "specifications": [
+        {
+          "label": "Màng loa",
+          "value": "5mm"
+        },
+        {
+          "label": "Kháng nước",
+          "value": "IPX4 (theo điều kiện thử nghiệm của hãng)"
+        },
+        {
+          "label": "Phát nhạc liên tục",
+          "value": "Tối đa 8,5 giờ bật chống ồn; 12 giờ tắt chống ồn"
+        },
+        {
+          "label": "Kết nối đa điểm",
+          "value": "Có"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.sony.com.vn/electronics/support/wireless-headphones-bluetooth-headphones/wf-c710n/specifications"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://sony.scene7.com/is/image/sonyglobalsolutions/Primary_image_1?$S7Product$&fmt=png-alpha",
+          "local": "/images/catalog-2026-11/sony-wfc710n-1.png",
+          "bytes": 73309
+        }
+      ]
+    },
+    {
+      "name": "Samsung 990 PRO NVMe M.2 · 1TB",
+      "sku": "CH-SAM-MZ-V9P1T0BW",
+      "brand": "Samsung",
+      "modelName": "MZ-V9P1T0BW",
+      "categorySlug": "luu-tru",
+      "description": "SSD gắn trong chuẩn M.2 2280 dùng giao tiếp PCIe 4.0 x4. Tốc độ đọc và ghi tuần tự là mức tối đa do hãng công bố; kết quả thực tế phụ thuộc hệ thống.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/samsung-990-pro-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/samsung-990-pro-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Dung lượng",
+          "value": "1TB"
+        },
+        {
+          "label": "Kích thước chuẩn",
+          "value": "M.2 2280"
+        },
+        {
+          "label": "Giao tiếp",
+          "value": "PCIe Gen 4.0 x4 · NVMe 2.0"
+        },
+        {
+          "label": "Đọc tuần tự",
+          "value": "Tối đa 7.450 MB/s"
+        },
+        {
+          "label": "Ghi tuần tự",
+          "value": "Tối đa 6.900 MB/s"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.samsung.com/vn/memory-storage/nvme-ssd/990-pro-1tb-nvme-pcie-gen-4-mz-v9p1t0bw/"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/mz-v9p1t0bw/gallery/vn-990pro-nvme-m2-ssd-mz-v9p1t0bw-539179649?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-990-pro-1.png",
+          "bytes": 287884
+        },
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/mz-v9p1t0bw/gallery/vn-990pro-nvme-m2-ssd-mz-v9p1t0bw-539179634?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-990-pro-2.png",
+          "bytes": 298379
+        }
+      ]
+    },
+    {
+      "name": "Samsung Portable SSD T7 Shield · 1TB Đen",
+      "sku": "CH-SAM-MU-PE1T0S-WW",
+      "brand": "Samsung",
+      "modelName": "MU-PE1T0S/WW",
+      "categorySlug": "luu-tru",
+      "description": "SSD di động 1TB với vỏ bảo vệ, giao tiếp USB 3.2 Gen 2 và kháng bụi, nước IP65 theo thử nghiệm của hãng. Tốc độ thực tế phụ thuộc máy chủ, cáp và môi trường sử dụng.",
+      "price": 0,
+      "stock": 0,
+      "isActive": true,
+      "condition": "Chưa xác nhận tình trạng hàng thực tế",
+      "imageUrl": "/images/catalog-2026-11/samsung-t7-shield-1.png",
+      "gallery": [
+        "/images/catalog-2026-11/samsung-t7-shield-2.png"
+      ],
+      "specifications": [
+        {
+          "label": "Dung lượng",
+          "value": "1TB"
+        },
+        {
+          "label": "Giao tiếp",
+          "value": "USB 3.2 Gen 2 · 10Gbps"
+        },
+        {
+          "label": "Đọc / ghi tuần tự",
+          "value": "Tối đa 1.050 / 1.000 MB/s"
+        },
+        {
+          "label": "Kháng bụi, nước",
+          "value": "IP65 (theo điều kiện thử nghiệm của hãng)"
+        },
+        {
+          "label": "Khối lượng",
+          "value": "Khoảng 98g"
+        },
+        {
+          "label": "Nguồn thông tin",
+          "value": "https://www.samsung.com/vn/memory-storage/portable-ssd/t7-shield-1tb-black-external-storage-nvme-1050-mb-s-mu-pe1t0s-ww/"
+        },
+        {
+          "label": "Ngày tra cứu",
+          "value": "2026-11-07"
+        }
+      ],
+      "assets": [
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/mu-pe1t0s-ww/gallery/vn-portable-ssd-t7-shield-mu-pe1t0s-ww-539527303?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-t7-shield-1.png",
+          "bytes": 674314
+        },
+        {
+          "url": "https://images.samsung.com/is/image/samsung/p6pim/vn/mu-pe1t0s-ww/gallery/vn-portable-ssd-t7-shield-mu-pe1t0s-ww-539527287?$1164_776_PNG$",
+          "local": "/images/catalog-2026-11/samsung-t7-shield-2.png",
+          "bytes": 507907
+        }
+      ]
+    }
+  ],
+  "existing": [
+    {
+      "id": "6ad60f17d359bde0effec266",
+      "sku": "LAP-TEST-001",
+      "brand": "ASUS",
+      "modelName": "TUF Gaming F15 (2023) FX507",
+      "categorySlug": "laptop-gaming"
+    },
+    {
+      "id": "6ada02311f1f5bbee7423650",
+      "sku": "SKU-ROG-1792672305504",
+      "brand": "ASUS",
+      "modelName": "ROG Strix G16 (2024) G614",
+      "categorySlug": "laptop-gaming"
+    },
+    {
+      "id": "6ada02321f1f5bbee7423651",
+      "sku": "SKU-NOCAT-1792672305504",
+      "brand": "ASUS",
+      "modelName": "Vivobook 15 X1504",
+      "categorySlug": "laptop-van-phong"
+    },
+    {
+      "id": "6aca309bc3d315433be354a9",
+      "sku": "CPU-INTEL-I5-14600K",
+      "brand": "Intel",
+      "modelName": "Core i5-14600K",
+      "categorySlug": "linh-kien"
+    }
+  ]
+}

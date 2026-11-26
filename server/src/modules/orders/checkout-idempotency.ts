@@ -6,10 +6,10 @@ export const isValidIdempotencyKey = (value: unknown): value is string => {
   return typeof value === "string" && IDEMPOTENCY_KEY_PATTERN.test(value);
 };
 
-export const createCheckoutRequestHash = (addressId: string, couponCode?: string): string => {
+export const createCheckoutRequestHash = (addressId: string, couponCode?: string, paymentMethod = 'COD'): string => {
   const payload = JSON.stringify({
     addressId: addressId.toLowerCase(),
-    paymentMethod: "COD",
+    paymentMethod,
     ...(couponCode ? { couponCode } : {}),
   });
 

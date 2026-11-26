@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: berylcore
+    runtime: node
+    plan: free
+    region: singapore
+    branch: frontend/full-implementation
+    autoDeployTrigger: "off"
+    buildCommand: npm run deps:install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERVE_FRONTEND
+        value: "true"
+      - key: UPLOAD_STORAGE
+        value: gridfs
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: "1"
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: MAIL_TRANSPORT
+        value: brevo
+      - key: MAIL_FROM
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_VERIFICATION_REQUIRED
+        value: "true"
+      - key: SEPAY_ENABLED
+        value: "false"
+      - key: GHN_ENABLED
+        value: "false"
+      - key: VNPAY_ENABLED
+        value: "false"
+      - key: TRUSTED_PROXIES
+        value: loopback,linklocal,uniquelocal

@@ -8,6 +8,7 @@ export interface ReviewInput {
   rating: number;
   title: string;
   comment: string;
+  version?: number;
 }
 
 export interface PaginationInput {

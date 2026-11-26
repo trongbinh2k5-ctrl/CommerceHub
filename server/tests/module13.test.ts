@@ -24,7 +24,7 @@ test('Module 13: HTTP API, real replica-set transactions and migration', { timeo
   const port = (server.address() as { port: number }).port;
   const users = await User.create(['CUSTOMER', 'CUSTOMER', 'STAFF', 'ADMIN'].map((role, i) => ({ fullName: role, email: `m13-${i}@test.local`, passwordHash: 'unused', role })));
   const tokens = users.map(u => jwt.sign({ role: u.role }, process.env.JWT_ACCESS_SECRET!, { subject: u.id }));
-  const addresses = await Address.create(users.slice(0, 2).map(u => ({ userId: u._id, fullName: 'Test', phone: '0901234567', province: 'HCM', ward: 'Test', detail: 'Test address' })));
+  const addresses = await Address.create(users.slice(0, 2).map(u => ({ userId: u._id, fullName: 'Test', phone: '0901234567', province: 'Hồ Chí Minh', ward: 'Phường Sài Gòn', detail: 'Test address' })));
   const api = async (path: string, user = 0, method = 'GET', body?: unknown, key?: string) => {
     const res = await fetch(`http://127.0.0.1:${port}/api${path}`, { method, headers: { Authorization: `Bearer ${tokens[user]}`, 'Content-Type': 'application/json', ...(key === undefined ? {} : { 'Idempotency-Key': key }) }, body: body === undefined ? undefined : JSON.stringify(body) });
     return { status: res.status, body: await res.json() as any };

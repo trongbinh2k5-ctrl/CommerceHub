@@ -17,6 +17,9 @@ export interface ShipmentDocument {
   carrier: string;
   trackingCode: string;
   carrierFee: number;
+  provider?: 'MANUAL'|'GHN';
+  providerStatus?: string;
+  providerUpdatedAt?: Date;
 
   shippingAddress: {
     fullName: string;
@@ -114,6 +117,9 @@ const shipmentSchema = new Schema<ShipmentDocument>(
       min: 0,
       default: 0,
     },
+    provider:{type:String,enum:['MANUAL','GHN'],default:'MANUAL'},
+    providerStatus:{type:String,maxlength:80},
+    providerUpdatedAt:Date,
 
     shippingAddress: {
       fullName: {
@@ -153,7 +159,7 @@ const shipmentSchema = new Schema<ShipmentDocument>(
       type: Number,
       default: 0,
       min: 0,
-      max: 3,
+      validate:{validator:function(this:unknown,value:number){return Number.isSafeInteger(value)&&((this as Partial<ShipmentDocument>).provider==='GHN'||value<=3);},message:'Invalid delivery attempt count'},
     },
 
     failureReason: {

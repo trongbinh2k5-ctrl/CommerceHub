@@ -5,16 +5,21 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:demo": "tsx src/scripts/demo-server.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts src/modules/reviews/review-rules.test.ts src/modules/shipping/shipping-ruler.test.ts",
+    "test": "tsx --test --test-concurrency=1 tests/*.test.ts src/modules/reviews/review-rules.test.ts src/modules/shipping/shipping-ruler.test.ts",
     "test:security": "tsx --test tests/security.test.ts",
     "migrate:payments:dry-run": "tsx src/scripts/migrate-payments.ts",
     "migrate:payments": "tsx src/scripts/migrate-payments.ts --apply",
     "test:reviews": "tsx --test src/modules/reviews/review-rules.test.ts",
     "reviews:indexes": "tsx src/modules/reviews/review-indexes.ts",
-    "test:coupons": "tsx --test tests/coupons-errors.test.ts"
+    "test:coupons": "tsx --test tests/coupons-errors.test.ts",
+    "config:check": "tsx src/scripts/check-config.ts",
+    "email:verify": "tsx src/scripts/check-email.ts",
+    "email:test": "tsx src/scripts/check-email.ts --send",
+    "media:migrate": "tsx src/scripts/migrate-product-media.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,19 +29,28 @@
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.6",
+    "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.2",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.11.1"
+    "mongoose": "~9.11.4",
+    "nodemailer": "^10.5.0",
+    "sepay-pg-node": "^1.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.4",
+    "@types/nodemailer": "^8.0.2",
     "mongodb-memory-server": "^11.3.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   }
 }

@@ -40,8 +40,8 @@ test("Module 17: Admin Dashboard - Comprehensive Verification", { timeout: 30000
     userId: users[0]._id,
     fullName: "Customer",
     phone: "0901234567",
-    province: "Ha Noi",
-    ward: "Thach That",
+    province: 'Hồ Chí Minh',
+    ward: 'Phường Sài Gòn',
     detail: "So 10 Pho Dashboard",
   });
 
@@ -394,6 +394,11 @@ test("Module 17: Admin Dashboard - Comprehensive Verification", { timeout: 30000
 
     await t.test("15. low-stock?threshold=-1: 400 — Ngưỡng không hợp lệ", async () => {
       const res = await api("/low-stock?threshold=-1", tokens.admin);
+      assert.equal(res.status, 400);
+    });
+
+    await t.test("Repeated revenue periods are rejected instead of silently defaulting", async () => {
+      const res = await api("/revenue?period=month&period=day", tokens.admin);
       assert.equal(res.status, 400);
     });
 

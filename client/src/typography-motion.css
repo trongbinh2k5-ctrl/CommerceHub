@@ -1,0 +1,48 @@
+/* Keep Vietnamese diacritics readable, with no permanent scaling on text. */
+:root { --text-muted:#42536b;--text-subtle:#64748b;text-size-adjust:100%;-webkit-text-size-adjust:100%;font-kerning:normal; }
+body { font-weight:400; }
+h1,h2,h3 { line-height:1.4; }
+.showcase-layout .hero-copy h1 { line-height:1.22; }
+.product-card h3 { font-weight:600;line-height:1.65;min-height:3.3em; }
+.discovery-card h3,.brand-directory h2 { font-weight:600;line-height:1.5; }
+.discovery-card-count { font-size:13px; }
+.discovery-card p { line-height:1.8; }
+.footer-top>div>a:not(.wordmark),.footer-brand p { line-height:1.7; }
+.site-footer { --text-muted:#d2ddf0; }
+.header-search input::placeholder,input::placeholder,textarea::placeholder { color:var(--text-muted);opacity:1; }
+.product-information dt,.product-information dd { line-height:1.8; }
+
+@keyframes panel-arrive {
+  from { opacity:.4;transform:translateY(-6px); }
+  to { opacity:1;transform:none; }
+}
+@keyframes notice-arrive {
+  from { opacity:0;transform:translateY(12px); }
+  to { opacity:1;transform:none; }
+}
+@keyframes product-float {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-7px); }
+}
+@media(prefers-reduced-motion:no-preference) {
+  html { scroll-behavior:smooth; }
+  .category-menu[open] .category-menu-panel,.navigation.is-open { animation:panel-arrive 180ms ease-out; }
+  .category-menu summary>svg:last-child { transition:transform 180ms ease; }
+  .category-menu[open] summary>svg:last-child { transform:rotate(180deg); }
+  dialog[open] { animation:notice-arrive 180ms ease-out; }
+  .toast { animation:notice-arrive 240ms ease-out; }
+  .button svg,.text-link svg,.discovery-card h3 svg,.brand-directory .text-link svg { transition:transform 180ms ease; }
+  .button:not(:disabled):hover svg,.text-link:hover svg,.discovery-card:hover h3 svg { transform:translateX(3px); }
+  .discovery-card-art img { transition:transform 300ms ease; }
+  .discovery-card:hover .discovery-card-art img { transform:scale(1.035); }
+  .brand-directory>a { transition:border-color 180ms,background-color 180ms,box-shadow 180ms; }
+  .brand-directory>a:hover { box-shadow:var(--shadow-sm); }
+}
+@media(prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine) {
+  .spotlight-visual .product-image { animation:product-float 7s ease-in-out infinite; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html { scroll-behavior:auto; }
+  .category-menu-panel,.navigation,.toast,dialog,.spotlight-visual .product-image { animation:none !important; }
+  .button svg,.text-link svg,.discovery-card h3 svg,.discovery-card-art img,.category-menu summary>svg:last-child { transition:none !important; }
+}

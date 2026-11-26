@@ -19,7 +19,7 @@ export const addCategory = async (
     if (
       !body ||
       typeof body.name !== "string" ||
-      typeof body.slug !== "string" ||
+      (body.slug !== undefined && typeof body.slug !== "string") ||
       (body.description !== undefined && typeof body.description !== "string")
     ) {
       res.status(400).json({
@@ -30,10 +30,10 @@ export const addCategory = async (
     }
 
     const name = body.name.trim();
-    const slug = body.slug.trim().toLowerCase();
+    const slug = typeof body.slug === 'string' ? body.slug.trim().toLowerCase() : undefined;
     const description = body.description?.trim();
 
-    if (!name || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    if (!name || name.length > 100 || (slug !== undefined && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))) {
       res.status(400).json({
         success: false,
         message: "Invalid category name or slug",

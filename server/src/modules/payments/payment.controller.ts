@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 
 import { isValidOrderId } from "../orders/order.service";
+import { Payment, PaymentStatus } from './payment.model';
+import { listOrderRecords } from '../operations/list-query';
 
 import {
   PaymentError,
@@ -56,11 +58,12 @@ export const getMyPayment = async (
 
 // GET /api/admin/payments
 export const getAdminPayments = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
+    if (Object.keys(req.query).length) { res.json({success:true,...await listOrderRecords(Payment,req.query,Object.values(PaymentStatus))}); return; }
     const payments = await getAllPayments();
 
     res.json({

@@ -1,4 +1,3 @@
-import { Coupon, CouponUsage } from "../modules/coupons/coupon.model";
 import mongoose from "mongoose";
 
 export const connectDatabase = async (): Promise<void> => {
@@ -10,8 +9,9 @@ export const connectDatabase = async (): Promise<void> => {
 
   await mongoose.connect(mongoUri);
 
-  // Checkout relies on these unique indexes and pre-existing collections.
-  await Promise.all([Coupon.init(), CouponUsage.init()]);
+  // Do not accept requests until every registered model's collections and
+  // unique constraints are ready (checkout, payments, shipments and reviews).
+  await Promise.all(Object.values(mongoose.models).map(model => model.init()));
 
   console.log("MongoDB connected successfully");
 };
