@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { mailConfiguration } from './mail.config';
+import {sendGmailApi} from './gmail-api';
 
 export type Mail = { to: string; subject: string; text: string };
 let testTransport: ((mail: Mail) => Promise<void>) | undefined;
@@ -18,6 +19,7 @@ export async function sendMail(mail: Mail) {
   if (!emailAvailable()) throw Object.assign(new Error('Dịch vụ email chưa được cấu hình. Vui lòng liên hệ cửa hàng.'), { statusCode: 503 });
   const config = mailConfiguration();
   try {
+  if(config.transport==='gmail-api'){await sendGmailApi(config.gmail,config.from,mail);return;}
   if (config.transport === 'smtp') {
     const smtp = nodemailer.createTransport(config.smtp);
     try {
@@ -39,11 +41,13 @@ export async function sendMail(mail: Mail) {
     return;
   }
   const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: process.env.MAIL_FROM, to: [mail.to], subject: mail.subject, text: mail.text }),
+    method: 'POST', redirect:'error', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY!.trim()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: config.from, to: [mail.to], subject: mail.subject, text: mail.text }),
     signal: AbortSignal.timeout(15000),
   });
   if (!response.ok) throw new Error('Mail provider rejected message');
+  const result=await response.json() as {id?:unknown};
+  if(typeof result.id!=='string'||!result.id)throw new Error('Mail provider did not acknowledge message');
   } catch {
     // Never leak SMTP authentication responses, addresses, tokens or provider payloads.
     throw Object.assign(new Error('Chưa gửi được email. Kiểm tra cấu hình dịch vụ hoặc thử lại sau.'), { statusCode: 503 });

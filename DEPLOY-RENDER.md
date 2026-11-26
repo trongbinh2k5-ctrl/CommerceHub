@@ -1,15 +1,15 @@
 # Đưa BerylCore lên Render miễn phí
 
-Frontend và API dùng chung một dịch vụ Node.js, một địa chỉ HTTPS. Database dùng MongoDB Atlas đang có; ảnh tải lên lưu trong GridFS của cùng database. Gmail SMTP trên máy vẫn dùng được tại local, còn bản Render dùng Brevo API qua HTTPS.
+Frontend và API dùng chung một dịch vụ Node.js, một địa chỉ HTTPS. Database dùng MongoDB Atlas đang có; ảnh tải lên lưu trong GridFS của cùng database. Bản Render dùng **Gmail API qua Google Cloud OAuth**, gửi thư bằng Gmail của cửa hàng trên HTTPS.
 
-## 1 Đăng ký hai tài khoản
+## 1 Chuẩn bị Render và Google Cloud
 
 1. Mở [Render Dashboard](https://dashboard.render.com/), chọn Sign up → GitHub → Authorize Render. Vào Dashboard sau khi xác nhận email nếu có yêu cầu.
-2. Mở [Brevo](https://www.brevo.com/), tạo tài khoản Free. Điền thông tin đúng với dự án cá nhân/demo. Hoàn thành quy trình kích hoạt tài khoản gửi mail của nhà cung cấp.
-3. Trong Brevo, vào phần Senders, Domains & Dedicated IPs → Senders, tạo sender tên `BerylCore` với email bạn sở hữu, rồi xác minh email nhận được. Tên menu có thể thay đổi theo phiên bản dashboard.
-4. Trong phần SMTP & API → API Keys, tạo API key cho BerylCore. Đây là **API key**, không phải SMTP key. Bạn sẽ nhập trực tiếp trên Render ở bước 3; không gửi key vào chat hoặc commit vào Git.
+2. Mở [Google Cloud Console](https://console.cloud.google.com/), tạo project `BerylCore`, bật Gmail API.
+3. Cấu hình OAuth consent và tạo OAuth client loại Web application với scope `gmail.send`.
+4. Dùng công cụ OAuth của Google để cấp quyền gửi cho Gmail cửa hàng, lấy Client ID, Client secret và Refresh token. Nhập trực tiếp vào Environment của Render; không gửi các giá trị này vào chat.
 
-Brevo hiện có gói miễn phí 300 email/ngày. Khi dùng Gmail làm sender, Brevo có thể thay địa chỉ From bằng địa chỉ gửi thuộc hệ thống của họ; đây là phương án demo, cần kiểm tra hộp thư/thư rác. Chỉ cấu hình đủ trường chưa chứng minh tài khoản đã được duyệt gửi. [Gói Brevo](https://help.brevo.com/hc/en-us/articles/208589409-About-Brevo-s-pricing-plans), [quy tắc sender](https://help.brevo.com/hc/en-us/articles/14925263522578-Comply-with-Gmail-Yahoo-and-Microsoft-s-requirements-for-email-senders).
+Hướng dẫn chi tiết từng màn hình: [GMAIL-API-SETUP.md](GMAIL-API-SETUP.md). Không cần tên miền riêng để dùng Gmail gửi thư. Chỉ tài khoản cửa hàng cấp quyền; khách không cần OAuth Google. Với OAuth External còn ở Testing, refresh token Gmail hết hạn sau 7 ngày; xem phần hạn token trong hướng dẫn trước khi dùng demo lâu dài.
 
 ## 2 Mã nguồn và nhánh deploy
 
@@ -30,8 +30,11 @@ File `render.yaml` tại gốc repo cấu hình dịch vụ Free, Singapore, Nod
 | Biến | Điền ở đâu và giá trị |
 | --- | --- |
 | `MONGODB_URI` | Copy trên máy từ `server/.env`, dùng cùng Atlas database với dữ liệu demo hiện tại. Không thêm dấu nháy bao quanh giá trị trong Render. |
-| `MAIL_FROM` | `BerylCore <email-ban-da-xac-minh-tren-Brevo>`; thay phần email bằng sender thật. |
-| `BREVO_API_KEY` | API key vừa tạo trong Brevo, nhập trực tiếp tại Render. |
+| `MAIL_FROM` | `BerylCore <gmail-cua-ban@gmail.com>`, đúng Gmail đã cấp quyền gửi. |
+| `GMAIL_USER` | Cùng email Gmail ở MAIL_FROM. |
+| `GMAIL_CLIENT_ID` | OAuth Client ID trong project Google Cloud BerylCore. |
+| `GMAIL_CLIENT_SECRET` | Client secret của client đó. |
+| `GMAIL_REFRESH_TOKEN` | Refresh token cấp bằng client đó và Gmail cửa hàng. |
 
 6. `JWT_ACCESS_SECRET` được Render sinh ngẫu nhiên. Không dùng secret demo cố định.
 7. Bấm **Deploy Blueprint**. Theo dõi Events/Logs đến khi dịch vụ Live.
@@ -50,7 +53,9 @@ Nếu dùng **New → Web Service** thay Blueprint, điền đúng:
 | Instance Type | Free |
 | Health Check Path | `/health` |
 
-Sau đó thêm các Environment Variables giống `render.yaml`, gồm `NODE_ENV=production`, `SERVE_FRONTEND=true`, `UPLOAD_STORAGE=gridfs`, `MAIL_TRANSPORT=brevo`, `EMAIL_VERIFICATION_REQUIRED=true`, `MONGOMS_DISABLE_POSTINSTALL=1`, `TRUSTED_PROXIES=loopback,linklocal,uniquelocal`, `SEPAY_ENABLED=false`, `GHN_ENABLED=false`, `VNPAY_ENABLED=false`. Sinh JWT secret bằng chức năng Generate của dashboard nếu có. Không cần đặt PORT cố định; Render cấp PORT và app lắng nghe trên 0.0.0.0.
+Sau đó thêm các Environment Variables giống `render.yaml`, gồm `NODE_ENV=production`, `SERVE_FRONTEND=true`, `UPLOAD_STORAGE=gridfs`, `MAIL_TRANSPORT=gmail-api`, `EMAIL_VERIFICATION_REQUIRED=true`, `MONGOMS_DISABLE_POSTINSTALL=1`, `TRUSTED_PROXIES=loopback,linklocal,uniquelocal`, `SEPAY_ENABLED=false`, `GHN_ENABLED=false`, `VNPAY_ENABLED=false`. Sinh JWT secret bằng chức năng Generate của dashboard nếu có. Không cần đặt PORT cố định; Render cấp PORT và app lắng nghe trên 0.0.0.0.
+
+Nếu dịch vụ đã được tạo với cấu hình email khác, đổi MAIL_TRANSPORT thành `gmail-api`, thêm các biến GMAIL_* và sửa MAIL_FROM, sau đó Save/Redeploy. Thay YAML không tự cập nhật một dịch vụ đã tạo bằng Web Service thủ công.
 
 ## 4 Cho Render truy cập MongoDB Atlas
 
@@ -90,6 +95,8 @@ Mở URL Render thực tế được dashboard cấp; không tự đoán hostnam
 5. Đặt một đơn demo COD, kiểm tra admin thấy đơn, huy hiệu số đỏ và duyệt/hủy đúng điều kiện.
 6. Kiểm tra ảnh upload mới rồi redeploy một lần để xác nhận ảnh còn trong database.
 
+Để kiểm tra riêng ở local, điền biến Gmail API như [hướng dẫn Google Cloud](GMAIL-API-SETUP.md), chạy `npm run email:verify` rồi chủ động chạy `npm run email:test` trong server. Lệnh đầu chỉ kiểm tra OAuth; lệnh sau gửi về email kiểm tra của bạn. Không tự thay cấu hình SMTP local nếu bạn chưa muốn chuyển trên máy.
+
 Local và bản deploy có phiên đăng nhập riêng. Admin cũ vẫn là tài khoản trong cùng database, nhưng bạn cần đăng nhập lại trên domain mới.
 
 ## 7 Bật lại SePay và GHN sau khi có URL cố định
@@ -121,8 +128,9 @@ Thêm `GHN_ENV=staging`, `GHN_TOKEN`, `GHN_SHOP_ID`, sau đó `GHN_ENABLED=true`
 - `server/src/config/frontend.ts`: phục vụ frontend/SPA và CSP cho ảnh, thanh toán.
 - `server/src/config/hosted-environment.ts`: lấy origin của dịch vụ hosted.
 - `server/src/modules/products/media-storage.ts`: GridFS hoặc local.
-- `server/src/modules/auth/mail.service.ts`: SMTP, Resend và Brevo API.
+- `server/src/modules/auth/gmail-api.ts`: đổi token, tạo MIME và gửi qua Gmail API.
+- `server/src/modules/auth/mail.service.ts`: chọn adapter email theo cấu hình.
 - `server/src/scripts/migrate-product-media.ts`: chuyển ảnh local sang GridFS.
 - `server/tests/deployment*.test.ts`, `client/e2e-deploy`: kiểm thử cấu hình deploy và trình duyệt cùng origin.
 
-Nguồn: [Deploy Express](https://render.com/docs/deploy-node-express-app), [giới hạn Free](https://render.com/docs/free), [biến môi trường Render](https://render.com/docs/environment-variables), [Blueprint](https://render.com/docs/blueprint-spec), [Brevo API](https://developers.brevo.com/docs/send-a-transactional-email), [MongoDB GridFS](https://www.mongodb.com/docs/drivers/node/current/crud/gridfs/).
+Nguồn: [Deploy Express](https://render.com/docs/deploy-node-express-app), [giới hạn Free](https://render.com/docs/free), [biến môi trường Render](https://render.com/docs/environment-variables), [Blueprint](https://render.com/docs/blueprint-spec), [Gmail API](https://developers.google.com/workspace/gmail/api/guides/sending), [MongoDB GridFS](https://www.mongodb.com/docs/drivers/node/current/crud/gridfs/).

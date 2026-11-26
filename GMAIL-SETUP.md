@@ -1,5 +1,7 @@
 # Kết nối Gmail cho BerylCore trên máy
 
+Tài liệu này hướng dẫn SMTP local. Phương án deploy hiện tại dùng [Gmail API qua Google Cloud](GMAIL-API-SETUP.md), không cần cổng SMTP.
+
 Trạng thái kiểm tra ngày **11/11/2026**: đã nhập cấu hình Gmail; `email:verify` kết nối và xác thực SMTP thành công. Frontend 5173 và backend 5000 đang phản hồi. Chưa bắt buộc xác minh email và chưa xác nhận hoàn tất hai luồng đăng ký/khôi phục bằng email thật. Link local mở trên máy tính chạy website; việc truy cập bằng điện thoại đang để sau theo lựa chọn người dùng. Thanh toán và hãng vận chuyển để bàn sau, chưa triển khai VNPAY/GHN. Chatbot tiếp tục dùng kịch bản.
 
 ## 1. Tạo mật khẩu ứng dụng Google

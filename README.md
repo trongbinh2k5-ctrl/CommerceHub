@@ -25,6 +25,7 @@ Quản lý nhân viên ngày 06/11/2026: [tạo nhân viên, mật khẩu tạm,
 ## Tài liệu
 
 - [Deploy miễn phí lên Render từng bước](DEPLOY-RENDER.md)
+- [Cấu hình Gmail API qua Google Cloud cho bản deploy](GMAIL-API-SETUP.md)
 - [Tổng kết kiểm tra cuối ngày 24/11/2026 và các giới hạn còn lại](FINAL-REVIEW-2026-11-24.md)
 - [Kiến thức, câu hỏi và cách demo dự án khi phỏng vấn](INTERVIEW-GUIDE.md)
 - [Bảo mật backend](server/SECURITY.md)

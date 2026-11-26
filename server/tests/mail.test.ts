@@ -61,3 +61,22 @@ test('Brevo HTTPS delivery validates credentials, sends plain text and hides pro
     fail=false;ack=false;await assert.rejects(()=>sendMail({to:'customer@test.local',subject:'Test',text:'One-use link'}),(e:any)=>e.statusCode===503);assert.equal(calls,3);
   }finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
 });
+
+test('Resend HTTPS accepts an email id and does not expose rejected provider responses',async t=>{
+  const before={...process.env};
+  assert.equal(mailConfiguration({MAIL_TRANSPORT:'resend',MAIL_FROM:'BerylCore <onboarding@resend.dev>'}).ready,false);
+  Object.assign(process.env,{MAIL_TRANSPORT:'resend',MAIL_FROM:'BerylCore <onboarding@resend.dev>',RESEND_API_KEY:' fake-resend-test-key '});
+  let fail=false,ack=true,calls=0;
+  t.mock.method(globalThis,'fetch',async(url:unknown,options:RequestInit)=>{
+    calls++;assert.equal(url,'https://api.resend.com/emails');assert.equal(options.redirect,'error');
+    assert.equal((options.headers as Record<string,string>).Authorization,'Bearer fake-resend-test-key');
+    assert.deepEqual(JSON.parse(options.body as string),{from:'BerylCore <onboarding@resend.dev>',to:['owner@test.local'],subject:'Xác minh',text:'One-use link'});
+    return new Response(JSON.stringify(fail?{message:'fake-resend-test-key private recipient'}:ack?{id:'fake-email-id'}:{}),{status:fail?403:200});
+  });
+  const mail={to:'owner@test.local',subject:'Xác minh',text:'One-use link'};
+  try{
+    assert.equal(emailAvailable(),true);await sendMail(mail);
+    fail=true;await assert.rejects(()=>sendMail(mail),(e:any)=>e.statusCode===503&&!e.message.includes('private recipient')&&!e.message.includes('fake-resend-test-key'));
+    fail=false;ack=false;await assert.rejects(()=>sendMail(mail),(e:any)=>e.statusCode===503);assert.equal(calls,3);
+  }finally{for(const key of Object.keys(process.env))if(!(key in before))delete process.env[key];Object.assign(process.env,before);}
+});

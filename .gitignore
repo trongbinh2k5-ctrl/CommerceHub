@@ -12,3 +12,6 @@ playwright-report/
 /.local/
 /server/var/uploads/
 /client/qa/
+/server/credentials.json
+/server/token.json
+/server/client_secret_*.json
