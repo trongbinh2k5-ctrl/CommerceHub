@@ -33,7 +33,7 @@ export function Auth({ register = false }: { register?: boolean }) {
       if (register) {
         if (password !== f.get('confirm')) throw new Error('Mật khẩu nhập lại chưa khớp.');
         const { data } = await api<{verificationRequired:boolean;emailSent:boolean}>('/auth/register', 'POST', { fullName:f.get('fullName'), email, password });
-        if (data.verificationRequired) { navigate('/verify-email'); return; }
+        if (data.verificationRequired) { navigate('/verify-email', { state: { email, emailSent: data.emailSent } }); return; }
         if (data.emailSent) notify('Tài khoản đã được tạo. Kiểm tra email để xác minh.');
       }
       await login(email, password); navigate(from, { replace:true });

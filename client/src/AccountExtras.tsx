@@ -1,6 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from './api';
 import { useSession } from './context';
@@ -9,6 +9,8 @@ import type { User } from './types';
 
 export function RecoveryPage({ mode }: { mode: 'forgot' | 'reset' | 'verify' }) {
   const { logout } = useSession();
+  const location = useLocation();
+  const regState = location.state as { email?: string; emailSent?: boolean } | null;
   const [params] = useSearchParams(); const navigate = useNavigate(); const [error, setError] = useState(''); const [message, setMessage] = useState(''); const [busy, setBusy] = useState(false);
   const options = useQuery({ queryKey: ['auth-options'], queryFn: () => api<{emailDeliveryAvailable: boolean}>('/auth/options') });
   const token = params.get('token');
@@ -27,9 +29,10 @@ export function RecoveryPage({ mode }: { mode: 'forgot' | 'reset' | 'verify' }) 
   };
   const title = mode === 'forgot' ? 'Quên mật khẩu' : mode === 'reset' ? 'Đặt lại mật khẩu' : 'Xác minh email';
   return <div className="shell recovery-page"><div className="auth-form"><h1>{title}</h1>{message ? <><p role="status" className="success-note">{message}</p><button className="button" onClick={() => navigate('/login')}>Đến đăng nhập</button></> : <form onSubmit={submit}>
+    {mode === 'verify' && !token && regState?.emailSent && <p role="status" className="success-note">Đã gửi liên kết xác minh đến <strong>{regState.email}</strong>. Vui lòng kiểm tra hộp thư (kể cả Thư rác) và bấm vào liên kết.</p>}
     {!token && options.data && !options.data.data.emailDeliveryAvailable && <p className="subtle-box">Cửa hàng chưa kết nối dịch vụ email. Chức năng gửi liên kết sẽ khả dụng sau khi quản trị cấu hình.</p>}
-    {mode === 'reset' ? <>{!token && <p role="alert">Liên kết chưa có mã khôi phục.</p>}<label>Mật khẩu mới<input name="password" type="password" autoComplete="new-password" minLength={8} maxLength={72} required/></label><label>Nhập lại mật khẩu<input name="confirm" type="password" autoComplete="new-password" minLength={8} maxLength={72} required/></label></> : token ? <p>Nhấn xác nhận để hoàn tất xác minh email. Liên kết chỉ dùng một lần.</p> : <label>Email tài khoản<input name="email" type="email" autoComplete="email" maxLength={254} required/></label>}
-    <FormError error={error}/><button className="button" disabled={busy || (mode === 'reset' && !token) || (!token && options.data?.data.emailDeliveryAvailable === false)}>{busy ? 'Đang xử lý…' : token && mode === 'verify' ? 'Xác nhận email' : mode === 'reset' ? 'Lưu mật khẩu mới' : 'Gửi liên kết'}</button>
+    {mode === 'reset' ? <>{!token && <p role="alert">Liên kết chưa có mã khôi phục.</p>}<label>Mật khẩu mới<input name="password" type="password" autoComplete="new-password" minLength={8} maxLength={72} required/></label><label>Nhập lại mật khẩu<input name="confirm" type="password" autoComplete="new-password" minLength={8} maxLength={72} required/></label></> : token ? <p>Nhấn xác nhận để hoàn tất xác minh email. Liên kết chỉ dùng một lần.</p> : <label>Email tài khoản<input name="email" type="email" autoComplete="email" maxLength={254} defaultValue={regState?.email || ''} required/></label>}
+    <FormError error={error}/><button className="button" disabled={busy || (mode === 'reset' && !token) || (!token && options.data?.data.emailDeliveryAvailable === false)}>{busy ? 'Đang xử lý…' : token && mode === 'verify' ? 'Xác nhận email' : mode === 'reset' ? 'Lưu mật khẩu mới' : regState?.emailSent ? 'Gửi lại liên kết' : 'Gửi liên kết'}</button>
   </form>}<p><Link className="text-link" to="/login">Quay lại đăng nhập</Link></p></div></div>;
 }
 
