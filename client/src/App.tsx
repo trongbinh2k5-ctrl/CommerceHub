@@ -66,17 +66,27 @@ function Layout() {
     document.addEventListener('mousedown', dismissSearch);
     return () => document.removeEventListener('mousedown', dismissSearch);
   }, []);
+  const currentTab = new URLSearchParams(location.search).get('tab') || 'profile';
   return <>
     <a href="#main" className="skip-link">Đến nội dung chính</a>
-    {menu && <Dialog title="Menu" className="customer-menu-drawer" close={() => setMenu(false)}><nav id="customer-menu" aria-label="Menu tài khoản">{[
-      ['/', 'Trang chủ', Cpu], ['/products', 'Khám phá thiết bị', Package], ['/account?tab=orders', 'Đơn hàng của tôi', Truck], ['/cart', 'Giỏ hàng', ShoppingCart], ['/account?tab=addresses', 'Sổ địa chỉ', MapPin], ['/account?tab=reviews', 'Đánh giá của tôi', Star], ['/account?tab=support', 'Đổi trả & bảo hành', ShieldCheck], ['/account?tab=notifications', 'Thông báo', Bell], ['/messages', 'Tin nhắn & tư vấn', MessageCircle], ['/account?tab=profile', 'Hồ sơ & bảo mật', UserRound],
-    ].map(([href, label, Icon]) => { const ItemIcon = Icon as typeof Package; return <Link key={String(href)} to={String(href)} onClick={() => setMenu(false)}><ItemIcon size={20} aria-hidden="true"/>{String(label)}</Link>; })}{user && <button onClick={() => { setMenu(false); logout(); }}><LogOut size={20} aria-hidden="true"/>Đăng xuất</button>}</nav></Dialog>}
+    {menu && <Dialog title="Menu" className="customer-menu-drawer" close={() => setMenu(false)}><nav id="customer-menu" aria-label="Menu tài khoản">
+      <span className="drawer-section-label">Khám phá</span>
+      {[['/', 'Trang chủ', Cpu], ['/products', 'Khám phá thiết bị', Package], ['/collections', 'Danh mục sản phẩm', LayoutDashboard], ['/story', 'Về BerylCore', ShieldCheck], ['/help', 'Hướng dẫn & FAQ', Star]].map(([href, label, Icon]) => { const ItemIcon = Icon as typeof Package; return <Link key={String(href)} to={String(href)} onClick={() => setMenu(false)}><ItemIcon size={20} aria-hidden="true"/>{String(label)}</Link>; })}
+      {user && user.role !== 'CUSTOMER' ? <>
+        <span className="drawer-section-label">Vận hành & Tài khoản</span>
+        {[['/admin', 'Trang quản trị', LayoutDashboard], ['/admin/chat', 'Tin nhắn khách hàng', MessageCircle], ['/account?tab=profile', 'Hồ sơ & bảo mật', UserRound]].map(([href, label, Icon]) => { const ItemIcon = Icon as typeof Package; return <Link key={String(href)} to={String(href)} onClick={() => setMenu(false)}><ItemIcon size={20} aria-hidden="true"/>{String(label)}</Link>; })}
+      </> : <>
+        <span className="drawer-section-label">Mua sắm & Tài khoản</span>
+        {[['/account?tab=orders', 'Đơn hàng của tôi', Truck], ['/cart', 'Giỏ hàng', ShoppingCart], ['/account?tab=profile', 'Hồ sơ & bảo mật', UserRound], ['/account?tab=addresses', 'Sổ địa chỉ', MapPin], ['/account?tab=reviews', 'Đánh giá của tôi', Star], ['/account?tab=support', 'Đổi trả & bảo hành', ShieldCheck], ['/account?tab=notifications', 'Thông báo', Bell], ['/messages', 'Tin nhắn & tư vấn', MessageCircle]].map(([href, label, Icon]) => { const ItemIcon = Icon as typeof Package; return <Link key={String(href)} to={String(href)} onClick={() => setMenu(false)}><ItemIcon size={20} aria-hidden="true"/>{String(label)}</Link>; })}
+      </>}
+      {user ? <button className="drawer-logout-btn" onClick={() => { setMenu(false); logout(); }}><LogOut size={20} aria-hidden="true"/>Đăng xuất</button> : <Link to="/login" onClick={() => setMenu(false)}><UserRound size={20} aria-hidden="true"/>Đăng nhập / Đăng ký</Link>}
+    </nav></Dialog>}
     <header className="site-header">
       <div className="header-main shell">
         <button ref={menuButton} type="button" className="icon-button left-menu" aria-label="Mở menu" aria-expanded={menu} aria-controls={menu ? 'customer-menu' : undefined} onClick={() => setMenu(true)}><Menu/></button><BrandLogo/>
         <div className="navigation">
           <nav id="primary-navigation" className="header-navigation" aria-label="Điều hướng chính">
-            <div className="header-links"><NavLink to="/" end>Trang chủ</NavLink><NavLink to="/products">Tất cả thiết bị</NavLink><NavLink to="/story">Về BerylCore</NavLink>{user && <NavLink to="/account">{user.role === 'CUSTOMER' ? 'Đơn hàng của tôi' : 'Tài khoản'}</NavLink>}</div>
+            <div className="header-links"><NavLink to="/" end>Trang chủ</NavLink><NavLink to="/products">Tất cả thiết bị</NavLink><NavLink to="/story">Về BerylCore</NavLink>{user && (user.role === 'CUSTOMER' ? <Link to="/account?tab=orders" className={location.pathname === '/account' && currentTab === 'orders' ? 'active' : ''}>Đơn hàng của tôi</Link> : <NavLink to="/account">Tài khoản</NavLink>)}</div>
             {user && <button className="mobile-logout" onClick={logout}>Đăng xuất</button>}
           </nav>
         </div>
@@ -117,7 +127,7 @@ function Layout() {
             </div>
           )}
         </form>
-        <div className="header-actions">{user && <button type="button" className="icon-button header-logout" aria-label="Đăng xuất" title="Đăng xuất" onClick={() => void logout()}><LogOut size={19}/></button>}
+        <div className="header-actions">
           <Link to={user ? '/account' : '/login'} className="account-link" aria-label={user ? `Tài khoản ${user.fullName}` : 'Đăng nhập tài khoản'}><UserRound size={20}/><span>{user ? user.fullName.split(' ').at(-1) : 'Tài khoản'}</span></Link>
           <HeaderNotifications/>{user?.role === 'CUSTOMER' || !user ? <Link to="/cart" className="bag-link cart-link" aria-label={`Giỏ hàng, ${cartQuantity} sản phẩm`}><ShoppingCart size={24} strokeWidth={2} aria-hidden="true"/><span className="cart-label">Giỏ hàng</span><span className="cart-count" aria-hidden="true">{cartQuantity > 99 ? '99+' : cartQuantity}</span></Link> : <Link to="/admin" className="text-link" aria-label="Quản trị"><span>Quản trị</span><LayoutDashboard size={20}/></Link>}
 
@@ -135,7 +145,7 @@ function Layout() {
       <div className="shell footer-top">
         <div className="footer-brand"><BrandLogo/><p>Thiết bị cho công việc và những điều bạn thích.</p></div>
         <div><span className="eyebrow footer-label">Khám phá</span><Link to="/products">Tất cả thiết bị</Link><Link to="/story">Về BerylCore</Link><Link to="/contact">Liên hệ</Link></div><div><span className="eyebrow footer-label">Chính sách</span><Link to="/policies/shipping">Giao hàng</Link><Link to="/policies/returns">Đổi trả</Link><Link to="/policies/warranty">Bảo hành</Link></div>
-        <div><span className="eyebrow footer-label">Mua sắm & hỗ trợ</span><Link to="/account">Đơn hàng & địa chỉ</Link><Link to="/cart">Giỏ hàng</Link><Link to="/messages">Tin nhắn</Link><Link to="/help">Hướng dẫn & FAQ</Link></div>
+        <div><span className="eyebrow footer-label">Mua sắm & hỗ trợ</span><Link to="/account?tab=orders">Đơn hàng & địa chỉ</Link><Link to="/cart">Giỏ hàng</Link><Link to="/messages">Tin nhắn</Link><Link to="/help">Hướng dẫn & FAQ</Link></div>
       </div>
       <div className="shell footer-bottom"><span>© {new Date().getFullYear()} BerylCore</span><nav className="footer-legal" aria-label="Thông tin pháp lý"><Link to="/policies/privacy">Quyền riêng tư</Link><Link to="/policies/terms">Điều khoản</Link></nav></div>
     </footer>
